@@ -3,7 +3,8 @@ This manual provides an end-to-end guide on running a mutational bioinformatics 
 
 In this pipeline, I used Ubuntu 2404.68.0 (accessed with WSL) for data wrangling and manipulation, Python 3.12.3 for data visualisation, and Rstudio 2025.05.1 for data annotation and visualisation.
 
-Before embarking 
+Before embarking on the analysis, users need to set up the appropriate environment and tools, if not already done so, for seamless execution. Users can read more *here* on how to start setting up the environment. 
+
 
 ## Table of Contents
 
