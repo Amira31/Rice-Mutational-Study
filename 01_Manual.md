@@ -10,20 +10,19 @@ Before embarking on the analysis, users need to set up the appropriate environme
 1. [Prerequisite Checklist](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
 2. [Setting up the directory](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
 3. [Indexing of reference genome](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
-4. d
-5. e
-6. f
-7. g
-8. h
+4. [Prerequisite Checklist](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
+5. [Setting up the directory](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
+6. [Indexing of reference genome](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
+7. [Prerequisite Checklist](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
+8. [Setting up the directory](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
    
 ## Step 0: Prerequisite Checklist
 Before starting, users need to ensure that the starting input file is in the `FASTQ` `(.fastq/.fq)` or zipped `FASTQ` `(.fastq.gz/.fq.gz)` format for their wild-type and mutant sequences. 
 
 Users can also, optionally, use raw `FASTA` `(.fasta/.fa)` wild-type/mutant sequences. However, FASTA will not provide enough data for a comprehensive variant analysis. FASTQ, on the other hand, has a Phred quality score for each base (in line 4) thus allowing more depth to the analysis.
 
-```
-# Example of four-line string in FASTQ file.
-
+```bash
+# Example of four-line string in FASTQ file
 (line 1) @SEQ_ID
 (line 2) GATTTGGGGTTCAAAGCAGTATCGATCAAATAGTAAATCCATTTGTTGA
 (line 3) +
@@ -39,7 +38,7 @@ Users will need to create a directory to store their input and output datasets i
 
 I would suggest users to create a parent directory and the sub-directories. Users may name the parent directory as the type of the analysis. For the sub-directories, users may name them according to the output format. 
 
-```
+```bash
 # Get into the mounted D drive:
 cd /mnt
 cd d
@@ -52,7 +51,7 @@ mkdir -p rice_wgrs/30_vcf
 ```
 
 This will give out folder structure as below:
-```
+```bash
 rice_wgrs/
 └── /00_fastq
 └── /10_ref
@@ -67,15 +66,15 @@ rice_wgrs/
 
 ## Step 2: Indexing of reference genome 
 
-First, you will need to download reference genome sequence in `FASTA` format `(.fa/.fna)` from NCBI together with its gene annotation file in GFF/GTF/GFF3 format. We will download these files with `wget` and unzip them with `gunzip`. 
+First, users will need to download reference genome sequence in `FASTA` format `(.fa/.fna)` from NCBI together with its gene annotation file in GFF/GTF/GFF3 format. We will download these files with `wget` and unzip them with `gunzip`. 
 
 For this pipeline, I will use a japonica cv. Nipponbare AGIS 1.0 reference genome. 
 
 **1. Retrieve FASTA and GFF links:** `bash`
 
-You might wonder how one can obtain independent links for FASTA and GFF because NCBI genome assembly main page only shows the bulk download menu. Fret not, all you need to do is click the `FTP` menu and it will redirect to a page with a list of hyperlinks. Browse through and look for links that end with `.fna.gz` and `gff.gz`. Now, you need to copy the `ftp` page link and add behind it the FASTA and GFF links you found on the terminal, as below:
+Users might wonder how one can obtain independent links for FASTA and GFF because NCBI genome assembly main page only shows the bulk download menu. Fret not, all they need to do is click the `FTP` menu and it will redirect to a page with a list of hyperlinks. Browse through and look for links that end with `.fna.gz` and `gff.gz`. Now, users need to copy the `ftp` page link and add behind it the FASTA and GFF links they found on the terminal, as below:
 
-```
+```bash
 # Download reference FASTA
 wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/034/140/825/GCF_034140825.1_ASM3414082v1/GCF_034140825.1_ASM3414082v1_genomic.fna.gz   
 
@@ -84,32 +83,35 @@ wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/034/140/825/GCF_034140825.1_AS
 ```
 Since the file names are full of numbers, I would prefer to rename them into readable names.
 
-```
+```bash
 # Rename FASTA
 mv GCF_034140825.1_ASM3414082v1_genomic.fna.gz /10_ref/Nipponbare.fna.gz
 
 # Rename GFF
 mv GCF_034140825.1_ASM3414082v1_genomic.gff.gz /10_ref/Nipponbare.gff.gz
 ```
-Now, you need to decompress these files so they become usable for shell scripting.
-```
+Now, users need to decompress these files so they become usable for shell scripting.
+```bash
 gunzip /10_ref/Nipponbare.fna.gz
 gunzip /10_ref/Nipponbare.gff.gz
 ```
 
 **2. Index the reference FASTA** `bash`
 
-Now, once you have your reference `.fna/.fasta` file, you need to index the genome first. It is a rule of thumb to create an `index` file for the reference genome before you begin with the alignment process. 
+Now, once users have their reference `.fna/.fasta` file, they need to index the genome first. It is a rule of thumb to create an `index` file for the reference genome before they can begin with the alignment process. 
 
 Think of an index as a table of contents in a book. Searching for a specific subtopic from the table of contents page is faster than searching page by page from the beginning. That is similar to what reference indexing tries to achieve. An aligner tool will jump directly to specific read positions based on the index file, rather than browsing the genome from the beginning. 
 
-Without an index file, your aligner will work extremely slowly and often will fail. Even with an index file, an aligner usually takes 2-8 hours to complete the entire ~370 Mb rice genome. 
+Without an indexed reference, the aligner will work extremely slowly and often will fail. Even with an index file, the aligner usually takes 2-8 hours to complete the entire ~370 Mb rice genome. 
 
-To index the reference, either `BWA` Burrows-Wheeler Aligner and `SAMtools` can be used for short-read WGS data. Certainly, you will need to install these tools first with `apt`. 
+To index the reference, either `BWA` Burrows-Wheeler Aligner, `BWA-MEM2` and `SAMtools` can be used for short-read WGS data. Certainly, users will need to install these tools first with `apt` and `mamba`. 
 
-```
+```bash
 # Index the reference using BWA  
 bwa index /10_ref/Nipponbare.fna
+
+# Index the reference using BWA-MEM2
+bwa-mem2 index /10_ref/Nipponbare.fna
 
 #Index the reference using SAMtools
 samtools faidx /10_ref/Nipponbare.fna
@@ -118,23 +120,36 @@ samtools faidx /10_ref/Nipponbare.fna
 
 ## Step 3: Alignment of short reads to reference genome
 
-Since you're doing a mutational study, you need to align both wild-type and mutant read pairs (R1 and R2) separately to the reference genome.  
+Since they are doing a mutational study, users need to align both wild-type and mutant read pairs (R1 and R2) separately to the reference genome.  
 
 
-“Before running the `bwa-mem` command, check your CPU specifications so you can estimate how many threads you can allocate for the alignment. 
+“Before running the `bwa-mem` command, users can check their CPU specifications so they can estimate how many threads they can allocate for the alignment. 
 
 If you're using a HPC node
 
+If users use the classic `BWA`:
 
+```bash
+# Align the wild-type to reference genome
+bwa mem -t 12 Nippombare.fna WT_R1.fq.gz WT_R2.fq.gz > WT.sam
+
+# Align the mutant to reference genome
+bwa mem -t 12 Nippombare.fna M_R1.fq.gz M_R2.fq.gz > M.sam
 ```
-bwa mem -t 16 /10_ref/Nipponbare.fna 
+If users use `BWA-MEM2`:
+```bash
+# Align the wild-type to reference genome
+bwa-mem2 mem -t 12 Nippombare.fna WT_R1.fq.gz WT_R2.fq.gz > WT.sam
+
+#  Align the mutant to reference genome
+bwa-mem2 mem -t 12 Nippombare.fna M_R1.fq.gz M_R2.fq.gz > M.sam
 ```
 
 ## Substep: Filter VCF for SNP index = 1
 Next, you will need to screen the large number of unique SNPs in the VCF to retain only SNPs with SNP index equals 1 (=1), or more than 0.8 (>= 0.8) if you want more selection. Then, optionally, you can validate the SNPs you filtered by visualising the BAM mutant/wild-type sequences on the IGV software. 
 
 **1. Create a zip file for the VCF** `bash` 
- ```
+ ```bash
 bgzip MR297.vcf
 bgzip ML-1.vcf
 ```
@@ -147,7 +162,7 @@ bgzip ML-1.vcf
 </br> **3. Set file names** `bash`
 
 wild-type:
-```
+```bash
 VCF_IN = "MR297.vcf.gz"
 ANNOT = "MR297.annot"
 HEADER = "MR297.header"
