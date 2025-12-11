@@ -3,13 +3,13 @@ This manual provides an end-to-end guide on running a mutational bioinformatics 
 
 In this pipeline, I used Ubuntu 2404.68.0 (accessed with WSL) for data wrangling and manipulation, Python 3.12.3 for data visualisation, and Rstudio 2025.05.1 for data annotation and visualisation.
 
-Before embarking on the analysis, users need to set up the appropriate environment and tools, if not already done so, for seamless execution. Users can read more `here` on how to start setting up the environment. 
+Before embarking on the analysis, users need to set up the appropriate environment and tools, if not already done so, for seamless execution. Users can read `here` on how to start setting up the environment. 
 
 
 ## Table of Contents
-1. Prerequisite Checklist
-2. b
-3. c
+1. [Prerequisite Checklist](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
+2. [Setting up the directory](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
+3. [Indexing of reference genome](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
 4. d
 5. e
 6. f
@@ -17,9 +17,9 @@ Before embarking on the analysis, users need to set up the appropriate environme
 8. h
    
 ## Step 0: Prerequisite Checklist
-Before starting, users need to ensure that the starting input file is in the FASTQ (.fastq/.fq) or zipped FASTQ (.fastq.gz/.fq.gz) format for their wild-type and mutant sequences. 
+Before starting, users need to ensure that the starting input file is in the `FASTQ` `(.fastq/.fq)` or zipped `FASTQ` `(.fastq.gz/.fq.gz)` format for their wild-type and mutant sequences. 
 
-Users can also, optionally, use raw FASTA (.fasta/.fa) wild-type/mutant sequences. However, FASTA will not provide enough data for a comprehensive variant analysis. FASTQ, on the other hand, has a Phred quality score for each base (in line 4) thus allowing more depth to the analysis.
+Users can also, optionally, use raw `FASTA` `(.fasta/.fa)` wild-type/mutant sequences. However, FASTA will not provide enough data for a comprehensive variant analysis. FASTQ, on the other hand, has a Phred quality score for each base (in line 4) thus allowing more depth to the analysis.
 
 ```
 # Example of four-line string in FASTQ file.
@@ -33,7 +33,7 @@ Alternatively, users can also use test dataset available `here` in this Rice Mut
 
 ## Step 1: Setting up directory
 
-You will need to create a directory to store your input and output datasets. This is to ensure accessibility to these datasets when running bash commands. Bash commands can be tricky for beginners if files are in different places. 
+Users will need to create a directory to store their input and output datasets in one place. This is to ensure accessibility to these datasets when running bash commands. Bash commands can be tricky for beginners if files are in different places. 
 
 **1. To create a directory:** `bash`
 
@@ -65,13 +65,13 @@ rice_wgrs/
 * **02_bam:**
 * **03_vcf:**
 
-## Step 2: Indexing of reference genome `bash`
+## Step 2: Indexing of reference genome 
 
-First, you will need to download reference genome sequence in FASTA format (.fa/.fna) from NCBI together with its gene annotation file in GFF/GTF/GFF3 format. We will download these files with `wget` and unzip them with `gunzip`. 
+First, you will need to download reference genome sequence in `FASTA` format `(.fa/.fna)` from NCBI together with its gene annotation file in GFF/GTF/GFF3 format. We will download these files with `wget` and unzip them with `gunzip`. 
 
 For this pipeline, I will use a japonica cv. Nipponbare AGIS 1.0 reference genome. 
 
-**1. Retrieve FASTA and GFF links:**
+**1. Retrieve FASTA and GFF links:** `bash`
 
 You might wonder how one can obtain independent links for FASTA and GFF because NCBI genome assembly main page only shows the bulk download menu. Fret not, all you need to do is click the `FTP` menu and it will redirect to a page with a list of hyperlinks. Browse through and look for links that end with `.fna.gz` and `gff.gz`. Now, you need to copy the `ftp` page link and add behind it the FASTA and GFF links you found on the terminal, as below:
 
@@ -85,20 +85,49 @@ wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/034/140/825/GCF_034140825.1_AS
 Since the file names are full of numbers, I would prefer to rename them into readable names.
 
 ```
-# Rename FNA
-mv GCF_034140825.1_ASM3414082v1_genomic.fna.gz Nipponbare.fna.gz
+# Rename FASTA
+mv GCF_034140825.1_ASM3414082v1_genomic.fna.gz /10_ref/Nipponbare.fna.gz
 
 # Rename GFF
-mv GCF_034140825.1_ASM3414082v1_genomic.gff.gz Nipponbare.gff.gz
+mv GCF_034140825.1_ASM3414082v1_genomic.gff.gz /10_ref/Nipponbare.gff.gz
+```
+Now, you need to decompress these files so they become usable for shell scripting.
+```
+gunzip /10_ref/Nipponbare.fna.gz
+gunzip /10_ref/Nipponbare.gff.gz
 ```
 
-**2. Index the reference FASTA**
-f
+**2. Index the reference FASTA** `bash`
+
+Now, once you have your reference `.fna/.fasta` file, you need to index the genome first. It is a rule of thumb to create an `index` file for the reference genome before you begin with the alignment process. 
+
+Think of an index as a table of contents in a book. Searching for a specific subtopic from the table of contents page is faster than searching page by page from the beginning. That is similar to what reference indexing tries to achieve. An aligner tool will jump directly to specific read positions based on the index file, rather than browsing the genome from the beginning. 
+
+Without an index file, your aligner will work extremely slowly and often will fail. Even with an index file, an aligner usually takes 2-8 hours to complete the entire ~370 Mb rice genome. 
+
+To index the reference, either `BWA` Burrows-Wheeler Aligner and `SAMtools` can be used for short-read WGS data. Certainly, you will need to install these tools first with `apt`. 
+
+```
+# Index the reference using BWA  
+bwa index /10_ref/Nipponbare.fna
+
+#Index the reference using SAMtools
+samtools faidx /10_ref/Nipponbare.fna
+```
+
 
 ## Step 3: Alignment of short reads to reference genome
 
+Since you're doing a mutational study, you need to align both wild-type and mutant read pairs (R1 and R2) separately to the reference genome.  
+
+
+“Before running the `bwa-mem` command, check your CPU specifications so you can estimate how many threads you can allocate for the alignment. 
+
+If you're using a HPC node
+
+
 ```
-bwa index Nipponbare.fna
+bwa mem -t 16 /10_ref/Nipponbare.fna 
 ```
 
 ## Substep: Filter VCF for SNP index = 1
