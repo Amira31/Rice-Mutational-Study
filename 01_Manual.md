@@ -64,7 +64,9 @@ rice_wgrs/
 * **02_bam:**
 * **03_vcf:**
 
-## Step 2: Indexing of reference genome 
+## Step 2: Quality check and trimming
+
+## Step 3: Indexing of reference genome 
 
 First, users will need to download reference genome sequence in `FASTA` format `(.fa/.fna)` from NCBI together with its gene annotation file in GFF/GTF/GFF3 format. We will download these files with `wget` and unzip them with `gunzip`. 
 
@@ -117,33 +119,62 @@ bwa-mem2 index /10_ref/Nipponbare.fna
 samtools faidx /10_ref/Nipponbare.fna
 ```
 
+## Step 4: Read alignment
 
-## Step 3: Alignment of short reads to reference genome
+Since they are doing a mutational study, users need to align both wild-type and mutant read pairs (R1 and R2) separately to the reference genome. Direct alignment between non-reference wild-type and mutant is not a general standard of practice and can lead to false-positive variant calling. 
 
-Since they are doing a mutational study, users need to align both wild-type and mutant read pairs (R1 and R2) separately to the reference genome.  
+**1. Decide how many threads to use** `bash`
+
+Before running the `bwa-mem` or `bwa-mem2 mem` commands, users can check the CPU specifications of their laptop or PC to estimate how many threads they can allocate to the alignment. 
+
+This is because alignment process is usually painstakingly long due to it being computationally intensive. So, activating multi-threading allows the aligner to split  different batches of reads into parallel queues of multiple CPU threads to reduce the total runtime. Then, the aligner will merge back these parallel alignment records into a single SAM/BAM output stream.
 
 
-“Before running the `bwa-mem` command, users can check their CPU specifications so they can estimate how many threads they can allocate for the alignment. 
+To check available CPU cores: 
 
-If you're using a HPC node
+```
+nproc
+```
+* **16 logical CPU cores:** recommended to use 8-16 threads
+* **8 logical CPU cores:** recommended to use 2-8 threads
+
+Since I have 16 logical cores (8 physical cores with 2 threads per core), so in this pipeline I utilise 16 threads. Users may use as many threads based on their available cores. 
+
+**2. Alignment of short reads to reference genome**
+
+Now, `mem` subcommand will be used for alignment, which produces large `SAM` files. Users should ensure sufficient free disk space on the D drive to accommodate the output. 
 
 If users use the classic `BWA`:
 
 ```bash
 # Align the wild-type to reference genome
-bwa mem -t 12 Nippombare.fna WT_R1.fq.gz WT_R2.fq.gz > WT.sam
+bwa mem -t 16 rice_wgrs/10_ref/Nippombare.fna rice_wgrs/WT_R1.fq.gz WT_R2.fq.gz > WT.sam
 
 # Align the mutant to reference genome
-bwa mem -t 12 Nippombare.fna M_R1.fq.gz M_R2.fq.gz > M.sam
+bwa mem -t 16 Nippombare.fna M_R1.fq.gz M_R2.fq.gz > M.sam
 ```
 If users use `BWA-MEM2`:
 ```bash
 # Align the wild-type to reference genome
-bwa-mem2 mem -t 12 Nippombare.fna WT_R1.fq.gz WT_R2.fq.gz > WT.sam
+bwa-mem2 mem -t 16 Nippombare.fna WT_R1.fq.gz WT_R2.fq.gz > WT.sam
 
 #  Align the mutant to reference genome
-bwa-mem2 mem -t 12 Nippombare.fna M_R1.fq.gz M_R2.fq.gz > M.sam
+bwa-mem2 mem -t 16 Nippombare.fna M_R1.fq.gz M_R2.fq.gz > M.sam
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## Substep: Filter VCF for SNP index = 1
 Next, you will need to screen the large number of unique SNPs in the VCF to retain only SNPs with SNP index equals 1 (=1), or more than 0.8 (>= 0.8) if you want more selection. Then, optionally, you can validate the SNPs you filtered by visualising the BAM mutant/wild-type sequences on the IGV software. 
