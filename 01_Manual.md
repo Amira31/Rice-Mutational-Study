@@ -58,13 +58,30 @@ rice_wgrs/
 └── /20_bam
 └── /30_vcf 
 ```
-* **rice_wgrs:** fff
-* **00_fastq:**
-* **01_ref:**
-* **02_bam:**
-* **03_vcf:**
+* `rice_wgrs:` Parent directory 
+* `00_fastq:` For storing filtered FASTQ files
+* `01_ref:` For storing reference genome files and GFF
+* `02_bam:` For storing BAM files after alignment
+* `03_vcf:` For storing VCF files after variant calling
 
 ## Step 2: Quality check and trimming
+ 
+```
+trimmomatic PE -threads 8 \
+  sample_R1.fastq.gz sample_R2.fastq.gz \
+  sample_R1_paired.fq.gz sample_R1_unpaired.fq.gz \
+  sample_R2_paired.fq.gz sample_R2_unpaired.fq.gz \
+  ILLUMINACLIP:TruSeq3-PE-2.fa:2:30:10 \
+  LEADING:3 TRAILING:3 \
+  SLIDINGWINDOW:4:15 \
+  MINLEN:36
+```
+
+* `PE:` paired-end
+* `-threads 4:` using 4 threads
+* 
+
+
 
 ## Step 3: Indexing of reference genome 
 
@@ -341,10 +358,20 @@ Chr1    85087   T       G       1
 Chr1    85349   C       T       1
 ```
 
+```bash
+# Check mapping stats
+bcftools stats  MR219.vcf.gz
+```
 
+```bash
+# CHeck contig names in GFF
+cut -f1 01_ref/Nipponbare.gff | sort | uniq
+```
 
-
-
+```bash
+# activate conda environment
+conda activate bioinfo
+```
 
 
 
