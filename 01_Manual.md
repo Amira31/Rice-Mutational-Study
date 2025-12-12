@@ -68,13 +68,24 @@ rice_wgrs/
  
 ```
 trimmomatic PE -threads 8 \
-  sample_R1.fastq.gz sample_R2.fastq.gz \
-  sample_R1_paired.fq.gz sample_R1_unpaired.fq.gz \
-  sample_R2_paired.fq.gz sample_R2_unpaired.fq.gz \
-  ILLUMINACLIP:TruSeq3-PE-2.fa:2:30:10 \
+  00_fastq/MR297_R1.fastq.gz 00_fastq/MR297_R2.fastq.gz \
+  00_fastq/MR297_R1_paired.fq.gz 00_fastq/MR297_R1_unpaired.fq.gz \
+  00_fastq/MR297_R2_paired.fq.gz 00_fastq/MR297_R2_unpaired.fq.gz \
+  ILLUMINACLIP:$CONDA_PREFIX/share/trimmomatic/adapters/TruSeq3-PE-2.fa:2:30:10 \
   LEADING:3 TRAILING:3 \
   SLIDINGWINDOW:4:15 \
   MINLEN:36
+
+
+trimmomatic PE -threads 8 \
+  00_fastq/ML-1_R1.fastq.gz 00_fastq/ML-1_R2.fastq.gz \
+  00_fastq/ML-1_R1_paired.fq.gz 00_fastq/ML-1_R1_unpaired.fq.gz \
+  00_fastq/ML-1_R2_paired.fq.gz 00_fastq/ML-1_R2_unpaired.fq.gz \
+  ILLUMINACLIP:$CONDA_PREFIX/share/trimmomatic/adapters/TruSeq3-PE-2.fa:2:30:10 \
+  LEADING:3 TRAILING:3 \
+  SLIDINGWINDOW:4:15 \
+  MINLEN:36
+
 ```
 
 * `PE:` paired-end
