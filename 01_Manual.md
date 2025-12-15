@@ -67,7 +67,7 @@ rice_wgrs/
 
 ## Step 2: Quality control and trimming
 
-**1. Trimming reads**
+**1. Trimming reads** `bash`
 
 Before using FASTQ reads for alignment, users should process them to remove adapter sequences, low-quality bases, and reads that are too short. This trimming and quality filtering can be performed using tools such as `TRIMMOMATIC` or `fastp`. In this pipeline, I used `TRIMMOMATIC v0.39`. 
 
@@ -102,7 +102,7 @@ trimmomatic PE -threads 8 \
 * `TruSeq3-PE-2.fa` Illumina adapter sequences to remove
 *  `LEADING:3` Removes bases with quality < 3 from the start of the read (5')
 *  `TRAILING:3` Removes bases with quality < 3 from the end of the read (3')
-*  `SLIDINGWINDOW:4:15` Sliding window of a size of 4 bases. The window slides from 5' to 3' and removes reads that have an average quality < 15. 
+*  `SLIDINGWINDOW:4:15` Sliding window of a size of 4 bases. The window slides from 5' to 3' and removes reads that have an average quality belows 15. 
 *  `MINLEN:75` Removes reads that are < 75 bases
 
 **2. Quality check** `bash`
@@ -132,7 +132,7 @@ fastqc -t 8 \
 
 ## Step 3: Indexing of reference genome 
 
-First, users will need to download reference genome sequence in `FASTA` format `(.fa/.fna)` from NCBI together with its gene annotation file in GFF/GTF/GFF3 format. We will download these files with `wget` and unzip them with `gunzip`. 
+First, users will need to download reference genome sequence in `FASTA` format `(.fa)` `(.fna)` from NCBI together with its gene annotation file in GFF/GTF/GFF3 format. We will download these files with `wget` and unzip them with `gunzip`. 
 
 For this pipeline, I will use a japonica cv. Nipponbare AGIS 1.0 reference genome. 
 
@@ -151,37 +151,37 @@ Since the file names are full of numbers, I would prefer to rename them into rea
 
 ```bash
 # Rename FASTA
-mv GCF_034140825.1_ASM3414082v1_genomic.fna.gz /10_ref/Nipponbare.fna.gz
+mv GCF_034140825.1_ASM3414082v1_genomic.fna.gz 10_ref/Nipponbare.fna.gz
 
 # Rename GFF
-mv GCF_034140825.1_ASM3414082v1_genomic.gff.gz /10_ref/Nipponbare.gff.gz
+mv GCF_034140825.1_ASM3414082v1_genomic.gff.gz 10_ref/Nipponbare.gff.gz
 ```
 Now, users need to decompress these files so they become usable for shell scripting.
 ```bash
-gunzip /10_ref/Nipponbare.fna.gz
-gunzip /10_ref/Nipponbare.gff.gz
+gunzip 10_ref/Nipponbare.fna.gz
+gunzip 10_ref/Nipponbare.gff.gz
 ```
 
 **2. Index the reference FASTA** `bash`
 
-Now, once users have their reference `.fna/.fasta` file, they need to index the genome first. It is a rule of thumb to create an `index` file for the reference genome before they can begin with the alignment process. 
+Now, once users have their reference `.fna` `.fasta` file, they need to index the genome first. It is a rule of thumb to create `index` files for the reference genome before they can begin with the alignment process. 
 
 Think of an index as a table of contents in a book. Searching for a specific subtopic from the table of contents page is faster than searching page by page from the beginning. That is similar to what reference indexing tries to achieve. An aligner tool will jump directly to specific read positions based on the index file, rather than browsing the genome from the beginning. 
 
-Without an indexed reference, the aligner will work extremely slowly and often will fail. Even with an index file, the aligner usually takes 2-8 hours to complete the entire ~370 Mb rice genome. 
+Without an indexed reference, the aligner will work extremely slowly and often will fail. Even with index files, the aligner usually takes 2-8 hours to complete the entire ~370 Mb rice genome. 
 
-To index the reference, either `BWA` Burrows-Wheeler Aligner, `BWA-MEM2` and `SAMtools` can be used for short-read WGS data. Certainly, users will need to install these tools first with `apt` and `mamba`. 
+To index the reference, either `BWA` Burrows-Wheeler Aligner, `BWA-MEM2` and `SAMtools` can be used for short-read WGS data. In this pipeline, I used `BWA v0.7.17`. 
 
 ```bash
 # Index the reference using BWA  
 bwa index 10_ref/Nipponbare.fna
-
-# Index the reference using BWA-MEM2
-bwa-mem2 index 10_ref/Nipponbare.fna
-
-#Index the reference using SAMtools
-samtools faidx 10_ref/Nipponbare.fna
 ```
+Indexing will create these five index outputs:
+* `Nipponbare.fna.amb`
+* `Nipponbare.fna.ann`
+* `Nipponbare.fna.bwt`
+* `Nipponbare.fna.pac`
+* `Nipponbare.fna.sa`
 
 ## Step 4: Read alignment
 
@@ -199,14 +199,40 @@ To check available CPU cores:
 ```
 nproc
 ```
-* **16 logical CPU cores:** recommended to use 8-16 threads
-* **8 logical CPU cores:** recommended to use 2-8 threads
+* `16 logical CPU cores` recommended to use 2-16 threads
+* `8 logical CPU cores` recommended to use 2-8 threads
 
-Since I have 16 logical cores (8 physical cores with 2 threads per core), so in this pipeline I utilise 16 threads. Users may use as many threads based on their available cores. 
+**2. Alignment of short reads to reference genome** `bash`
 
-**2. Alignment of short reads to reference genome**
+```bash
+# read alignment with bwa mem for wild-type
+bwa mem -t 4 10_ref/Nipponbare.fna \
+  01_trimmed_fastq/MR297_R1_paired.fq.gz \
+  01_trimmed_fastq/MR297_R2_paired.fq.gz | \
+samtools sort -@ 8 -o 20_bam/MR297.sorted.bam
 
-Now, `mem` subcommand will be used for alignment, which produces large `SAM` files. Users should ensure sufficient free disk space on the D drive to accommodate the output. 
+# read alignment with bwa mem for mutant
+bwa mem -t 4 10_ref/Nipponbare.fna \
+  01_trimmed_fastq/ML-1_R1_paired.fq.gz \
+  01_trimmed_fastq/ML-1_R2_paired.fq.gz | \
+samtools sort -@ 8 -o 20_bam/ML-1.sorted.bam
+```
+* `bwa mem -t 4` aligner tool that processes reads in 4 parallel threads
+* `|` BWA sends alignment output directly to samtools sort without creating intermediate SAM file
+* `samtools sort -@ 8` coordinate-sorting in 8 parallel threads
+* `-o` Sorted output will be written in BAM and stored in 20_bam folder
+
+## Step 5: BAM duplicate marking and indexing
+
+```bash
+# 
+samtools markdup -r \
+  20_bam/MR297.sorted.bam \
+  20_bam/MR297.markdup.bam
+
+samtools index 20_bam/MR297.markdup.bam
+```
+ 
 
 If users use the classic `BWA`:
 
