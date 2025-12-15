@@ -243,6 +243,19 @@ samtools index 20_bam/ML-1.bam
 ## Step 6: Variant calling
 
 ```bash
+# variant calling of wild-type
+bcftools mpileup -a AD,ADF,ADR -B -q 30 -Q 20 -C 50 -f Nipponbare.fna \
+20_bam/MR297.bam | \
+bcftools call -vm -f GQ,GP -O u | \
+bcftools filter -i 'INFO/MQ>=40 && INFO/DP>=10 && INFO/DP<=200' -O z -o 30_vcf/MR297.vcf.gz
+
+# variant calling of mutant
+bcftools mpileup -a AD,ADF,ADR -B -q 30 -Q 20 -C 50 -f Nipponbare.fna \
+20_bam/ML-1.bam | \
+bcftools call -vm -f GQ,GP -O u | \
+bcftools filter -i 'INFO/MQ>=40 && INFO/DP>=10 && INFO/DP<=200' -O z -o 30_vcf/ML1.vcf.gz
+```
+
 
 
 
