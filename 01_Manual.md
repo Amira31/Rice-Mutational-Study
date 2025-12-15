@@ -65,8 +65,9 @@ rice_wgrs/
 * `02_bam:` For storing BAM files after alignment
 * `03_vcf:` For storing VCF files after variant calling
 
-## Step 2: Quality check and trimming
+## Step 2: Quality control and trimming
 
+**1. Trimming reads**
 Before using FASTQ reads for alignment, users should process them to remove adapter sequences, low-quality bases, and reads that are too short. This trimming and quality filtering can be performed using tools such as `TRIMMOMATIC` or `fastp`. In this pipeline, I used `TRIMMOMATIC V0.39`. 
 
 ```bash
@@ -99,7 +100,7 @@ trimmomatic PE -threads 8 \
 * `-threads 4:` using 4 threads
 * 
 
-
+**2. Quality check**
 
 ## Step 3: Indexing of reference genome 
 
