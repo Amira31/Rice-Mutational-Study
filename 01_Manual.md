@@ -216,6 +216,27 @@ bwa mem -t 4 10_ref/Nipponbare.fna \
   01_trimmed_fastq/ML-1_R2_paired.fq.gz | \
 samtools sort -@ 8 -o 20_bam/ML-1.sorted.bam
 ```
+```bash
+# 1) Alignment only (fast, low memory pressure)
+bwa mem -t 4 10_ref/Nipponbare.fna \
+  01_trimmed_fastq/MR297_R1_paired.fq.gz \
+  01_trimmed_fastq/MR297_R2_paired.fq.gz \
+  > 20_bam/MR297.sam
+
+# 2) Sort + compress afterwards (controlled memory)
+samtools sort \
+  -@ 2 \
+  -m 512M \
+  -T ~/wgrs_tmp/MR297 \
+  -o 20_bam/MR297.sorted.bam \
+  20_bam/MR297.sam
+
+# 3) Cleanup
+rm 20_bam/MR297.sam
+```
+
+
+
 * `bwa mem -t 4` aligner tool that processes reads in 4 parallel threads
 * `|` BWA sends alignment output directly to samtools sort without creating intermediate SAM file
 * `samtools sort -@ 8` coordinate-sorting in 8 parallel threads
