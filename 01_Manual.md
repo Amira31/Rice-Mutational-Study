@@ -255,24 +255,40 @@ bcftools mpileup -a AD,ADF,ADR -B -q 30 -Q 20 -C 50 -f Nipponbare.fna \
 bcftools call -vm -f GQ,GP -O u | \
 bcftools filter -i 'INFO/MQ>=40 && INFO/DP>=10 && INFO/DP<=200' -O z -o 30_vcf/ML1.vcf.gz
 ```
+Or, alternatively,
 
 ```bash
 # join VCF
 bcftools mpileup -a AD,ADF,ADR -B -q 30 -Q 20 -C 50 -f Nipponbare.fna \
 20_bam/MR297.bam 20_bam/ML-1.bam | \
 bcftools call -vm -f GQ,GP -O u | \
-bcftools filter -i 'INFO/MQ>=40 && INFO/DP>=10 && INFO/DP<=200' -O z -o 30_vcf/MR297_ML1_joint.vcf.gz
+bcftools filter -i 'INFO/MQ>=40 && INFO/DP>=10 && INFO/DP<=200' -O z -o 30_vcf/MR297_ML-1.vcf.gz
 ```
+
+```bash
+tabix -p vcf 30_vcf/MR297_ML1.vcf.gz
+```
+
 ```bash
 # extract unique SNPs
 bcftools view -v snps -i 'GT[ML-1]!=0 && GT[MR297]==0' \
-30_vcf/MR297_ML1_joint.vcf.gz -Oz -o 30_vcf/ML1_unique_snps.vcf.gz
+30_vcf/MR297_ML1.vcf.gz -Oz -o 30_vcf/ML-1_unique_snps.vcf.gz
 
-# add AF column
-bcftools +fill-tags ML1_unique_snps.vcf.gz -- -t AF -Oz -o ML1_unique_snps_AF.vcf.gz
+# add AF column with +fill-tags
+bcftools +fill-tags ML-1_unique_snps.vcf.gz -- -t AF -Oz -o ML-1_unique_snps_AF.vcf.gz
+```
 
+optional:
+```
+# verify that AF column is there
+bcftools view -h ML-1_unique_snps_AF.vcf.gz | grep "^##FORMAT=<ID=AF"
+
+# see the values in the AF column
+bcftools query -f '%CHROM\t%POS\t[%AF]\n' ML1_unique_snps_AF.vcf.gz | head
+```
+```
 # filter for AF > 0.75
-bcftools view -i 'AF[ML-1]>0.75' ML1_unique_snps_AF.vcf.gz -Oz -o ML1_unique_snps_high_SNPindex.vcf.gz
+bcftools view -i 'AF[ML-1]>0.75' ML1_unique_snps_AF.vcf.gz -Oz -o ML-1_unique_snps_0.75.vcf.gz
 ```
 
 
