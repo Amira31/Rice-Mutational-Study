@@ -146,13 +146,13 @@ To index the reference, either `BWA` Burrows-Wheeler Aligner, `BWA-MEM2` and `SA
 
 ```bash
 # Index the reference using BWA  
-bwa index /10_ref/Nipponbare.fna
+bwa index 10_ref/Nipponbare.fna
 
 # Index the reference using BWA-MEM2
-bwa-mem2 index /10_ref/Nipponbare.fna
+bwa-mem2 index 10_ref/Nipponbare.fna
 
 #Index the reference using SAMtools
-samtools faidx /10_ref/Nipponbare.fna
+samtools faidx 10_ref/Nipponbare.fna
 ```
 
 ## Step 4: Read alignment
@@ -198,7 +198,18 @@ bwa-mem2 mem -t 16 Nippombare.fna WT_R1.fq.gz WT_R2.fq.gz > WT.sam
 bwa-mem2 mem -t 16 Nippombare.fna M_R1.fq.gz M_R2.fq.gz > M.sam
 ```
 
+```bash
+bwa mem -t 16 10_ref/Nipponbare.fna \
+  01_trimmed_fastq/MR297_R1_paired.fq.gz \
+  01_trimmed_fastq/MR297_R2_paired.fq.gz | \
+samtools sort -@ 8 -o 20_bam/MR297.sorted.bam
 
+samtools markdup -r \
+  20_bam/MR297.sorted.bam \
+  20_bam/MR297.markdup.bam
+
+samtools index 20_bam/MR297.markdup.bam
+```
 
 
 
@@ -392,9 +403,13 @@ cut -f1 01_ref/Nipponbare.gff | sort | uniq
 conda activate bioinfo
 ```
 
-
-
-
+```bash
+gunzip -c 10_ref/Nipponbare1.fna.gz \
+  | grep "^>" \
+  | sed 's/^>//' \
+  | cut -d' ' -f1 \
+  | sort -u
+```
 
 
 
