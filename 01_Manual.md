@@ -204,13 +204,13 @@ nproc
 **2. Alignment of short reads to reference genome** `bash`
 
 ```bash
-# read alignment with bwa mem for wild-type
+# reads alignment to reference for wild-type
 bwa mem -t 4 10_ref/Nipponbare.fna \
   01_trimmed_fastq/MR297_R1_paired.fq.gz \
   01_trimmed_fastq/MR297_R2_paired.fq.gz | \
 samtools sort -@ 8 -o 20_bam/MR297.sorted.bam
 
-# read alignment with bwa mem for mutant
+# reads alignment to reference for mutant
 bwa mem -t 4 10_ref/Nipponbare.fna \
   01_trimmed_fastq/ML-1_R1_paired.fq.gz \
   01_trimmed_fastq/ML-1_R2_paired.fq.gz | \
@@ -239,6 +239,10 @@ samtools markdup -r \
 samtools index 20_bam/ML-1.bam
 ```
 * `samtools markdup`
+
+## Step 6: Variant calling
+
+```bash
 
 
 
