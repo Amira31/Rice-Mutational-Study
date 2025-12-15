@@ -298,9 +298,11 @@ bcftools view -i 'AF[ML-1]>0.75' ML1_unique_snps_AF.vcf.gz -Oz -o ML-1_unique_sn
 
 
 
+<br/>
+<br/>
+<br/>
 
-
- 
+--- 
 
 If users use the classic `BWA`:
 
