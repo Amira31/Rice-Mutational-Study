@@ -107,6 +107,8 @@ trimmomatic PE -threads 8 \
 
 **2. Quality check** `bash`
 
+After trimming low-quality bases and adapter sequences, the paired and unpaired FASTQ outputs should be assessed using `FastQC` to evaluate read quality. Here, I used `FastQC v0.12.1`. 
+
 ```bash
 # create directory for FastQC report
 mkdir -p 02_fastqc
