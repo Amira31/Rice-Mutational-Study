@@ -8,13 +8,14 @@ Before embarking on the analysis, users need to set up the appropriate environme
 
 ## Table of Contents
 1. [Prerequisite Checklist](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
-2. [Setting up the directory](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
-3. [Indexing of reference genome](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
-4. [Prerequisite Checklist](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
-5. [Setting up the directory](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
-6. [Indexing of reference genome](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
-7. [Prerequisite Checklist](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
-8. [Setting up the directory](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
+2. [Step 1: Setting up the directory](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
+3. [Step 2: Quality control and trimming](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
+4. [Step 3: Indexing of reference genome](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
+5. [Prerequisite Checklist](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
+6. [Setting up the directory](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
+7. [Indexing of reference genome](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
+8. [Prerequisite Checklist](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
+9. [Setting up the directory](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
    
 ## Step 0: Prerequisite Checklist
 Before starting, users need to ensure that the starting input file is in the `FASTQ` `(.fastq/.fq)` or zipped `FASTQ` `(.fastq.gz/.fq.gz)` format for their wild-type and mutant sequences. 
@@ -65,26 +66,32 @@ rice_wgrs/
 * `03_vcf:` For storing VCF files after variant calling
 
 ## Step 2: Quality check and trimming
- 
-```
+
+Before using FASTQ reads for alignment, users should process them to remove adapter sequences, low-quality bases, and reads that are too short. This trimming and quality filtering can be performed using tools such as `TRIMMOMATIC` or `fastp`. In this pipeline, I used `TRIMMOMATIC V0.39`. 
+
+```bash
+# create directory for trimmmed FASTQ
+mkdir -p 01_trimmed_fastq
+
+# run trimming for wild-type:
 trimmomatic PE -threads 8 \
   00_fastq/MR297_R1.fastq.gz 00_fastq/MR297_R2.fastq.gz \
-  00_fastq/MR297_R1_paired.fq.gz 00_fastq/MR297_R1_unpaired.fq.gz \
-  00_fastq/MR297_R2_paired.fq.gz 00_fastq/MR297_R2_unpaired.fq.gz \
+  01_trimmed_fastq/MR297_R1_paired.fq.gz 01_trimmed_fastq/MR297_R1_unpaired.fq.gz \
+  01_trimmed_fastq/MR297_R2_paired.fq.gz 01_trimmed_fastq/MR297_R2_unpaired.fq.gz \
   ILLUMINACLIP:$CONDA_PREFIX/share/trimmomatic/adapters/TruSeq3-PE-2.fa:2:30:10 \
   LEADING:3 TRAILING:3 \
   SLIDINGWINDOW:4:15 \
-  MINLEN:36
+  MINLEN:75
 
-
+# run trimming for mutant:
 trimmomatic PE -threads 8 \
   00_fastq/ML-1_R1.fastq.gz 00_fastq/ML-1_R2.fastq.gz \
-  00_fastq/ML-1_R1_paired.fq.gz 00_fastq/ML-1_R1_unpaired.fq.gz \
-  00_fastq/ML-1_R2_paired.fq.gz 00_fastq/ML-1_R2_unpaired.fq.gz \
+  01_trimmed_fastq/ML-1_R1_paired.fq.gz 01_trimmed_fastq/ML-1_R1_unpaired.fq.gz \
+  01_trimmed_fastq/ML-1_R2_paired.fq.gz 01_trimmed_fastq/ML-1_R2_unpaired.fq.gz \
   ILLUMINACLIP:$CONDA_PREFIX/share/trimmomatic/adapters/TruSeq3-PE-2.fa:2:30:10 \
   LEADING:3 TRAILING:3 \
   SLIDINGWINDOW:4:15 \
-  MINLEN:36
+  MINLEN:75
 
 ```
 
