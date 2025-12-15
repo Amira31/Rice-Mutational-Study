@@ -59,16 +59,17 @@ rice_wgrs/
 └── /20_bam
 └── /30_vcf 
 ```
-* `rice_wgrs:` Parent directory 
-* `00_fastq:` For storing filtered FASTQ files
-* `01_ref:` For storing reference genome files and GFF
-* `02_bam:` For storing BAM files after alignment
-* `03_vcf:` For storing VCF files after variant calling
+* `rice_wgrs` Parent directory 
+* `00_fastq` For storing filtered FASTQ files
+* `01_ref` For storing reference genome files and GFF
+* `02_bam` For storing BAM files after alignment
+* `03_vcf` For storing VCF files after variant calling
 
 ## Step 2: Quality control and trimming
 
 **1. Trimming reads**
-Before using FASTQ reads for alignment, users should process them to remove adapter sequences, low-quality bases, and reads that are too short. This trimming and quality filtering can be performed using tools such as `TRIMMOMATIC` or `fastp`. In this pipeline, I used `TRIMMOMATIC V0.39`. 
+
+Before using FASTQ reads for alignment, users should process them to remove adapter sequences, low-quality bases, and reads that are too short. This trimming and quality filtering can be performed using tools such as `TRIMMOMATIC` or `fastp`. In this pipeline, I used `TRIMMOMATIC v0.39`. 
 
 ```bash
 # create directory for trimmmed FASTQ
@@ -96,11 +97,36 @@ trimmomatic PE -threads 8 \
 
 ```
 
-* `PE:` paired-end
-* `-threads 4:` using 4 threads
-* 
+* `PE` Paired-end mode
+* `-threads 8` Using 8 CPU threads
+* `TruSeq3-PE-2.fa` Illumina adapter sequences to remove
+*  `LEADING:3` Removes bases with quality < 3 from the start of the read (5')
+*  `TRAILING:3` Removes bases with quality < 3 from the end of the read (3')
+*  `SLIDINGWINDOW:4:15` Sliding window of a size of 4 bases. The window slides from 5' to 3' and removes reads that have an average quality < 15. 
+*  `MINLEN:75` Removes reads that are < 75 bases
 
-**2. Quality check**
+**2. Quality check** `bash`
+
+```bash
+# create directory for FastQC report
+mkdir -p 02_fastqc
+
+# run FastQC analysis for wild-type
+fastqc -t 8 \
+  01_trimmed_fastq/MR297_R1_paired.fq.gz \
+  01_trimmed_fastq/MR297_R2_paired.fq.gz \
+  01_trimmed_fastq/MR297_R1_unpaired.fq.gz \
+  01_trimmed_fastq/MR297_R2_unpaired.fq.gz \
+  -o 02_fastqc
+
+# run FastQC analysis for mutant
+fastqc -t 8 \
+  01_trimmed_fastq/ML-1_R1_paired.fq.gz \
+  01_trimmed_fastq/ML-1_R2_paired.fq.gz \
+  01_trimmed_fastq/ML-1_R1_unpaired.fq.gz \
+  01_trimmed_fastq/ML-1_R2_unpaired.fq.gz \
+  -o 02_fastqc
+```
 
 ## Step 3: Indexing of reference genome 
 
