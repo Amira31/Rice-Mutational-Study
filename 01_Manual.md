@@ -18,9 +18,9 @@ Before embarking on the analysis, users need to set up the appropriate environme
 9. [Setting up the directory](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
    
 ## Step 0: Prerequisite Checklist
-Before starting, users need to ensure that the starting input file is in the `FASTQ` `(.fastq/.fq)` or zipped `FASTQ` `(.fastq.gz/.fq.gz)` format for their wild-type and mutant sequences. 
+Before starting, users need to ensure that the starting input file is in the `FASTQ` or zipped `FASTQ` format for their wild-type and mutant sequences. 
 
-Users can also, optionally, use raw `FASTA` `(.fasta/.fa)` wild-type/mutant sequences. However, FASTA will not provide enough data for a comprehensive variant analysis. FASTQ, on the other hand, has a Phred quality score for each base (in line 4) thus allowing more depth to the analysis.
+Users can also, optionally, use raw `FASTA` wild-type/mutant sequences. However, FASTA will not provide enough data for a comprehensive variant analysis. FASTQ, on the other hand, has a Phred quality score for each base (in line 4) thus allowing more depth to the analysis.
 
 ```bash
 # Example of four-line string in FASTQ file
