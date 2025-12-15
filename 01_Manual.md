@@ -194,9 +194,8 @@ Before running the `bwa-mem` or `bwa-mem2 mem` commands, users can check the CPU
 This is because alignment process is usually painstakingly long due to it being computationally intensive. So, activating multi-threading allows the aligner to split  different batches of reads into parallel queues of multiple CPU threads to reduce the total runtime. Then, the aligner will merge back these parallel alignment records into a single SAM/BAM output stream.
 
 
-To check available CPU cores: 
-
-```
+```bash
+# to check available CPU cores
 nproc
 ```
 * `16 logical CPU cores` recommended to use 2-16 threads
@@ -225,13 +224,33 @@ samtools sort -@ 8 -o 20_bam/ML-1.sorted.bam
 ## Step 5: BAM duplicate marking and indexing
 
 ```bash
-# 
+# duplicate marking and indexing of wild-type BAM
 samtools markdup -r \
   20_bam/MR297.sorted.bam \
-  20_bam/MR297.markdup.bam
+  20_bam/MR297.bam
 
-samtools index 20_bam/MR297.markdup.bam
+samtools index 20_bam/MR297.bam
+
+# duplicate marking and indexing of mutant BAM
+samtools markdup -r \
+  20_bam/ML-1.sorted.bam \
+  20_bam/ML-1.bam
+
+samtools index 20_bam/ML-1.bam
 ```
+* `samtools markdup`
+
+
+
+
+
+
+
+
+
+
+
+
  
 
 If users use the classic `BWA`:
