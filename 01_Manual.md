@@ -167,7 +167,7 @@ Users are advised to run `FastQC` for both raw FASTQ and trimmed FASTQ, ensuring
 
 ## Step 3: Indexing of reference genome 
 
-First, users will need to download reference genome sequence in `FASTA` format `(.fa)` `(.fna)` from NCBI together with its gene annotation file in GFF/GTF/GFF3 format. We will download these files with `wget` and unzip them with `gunzip`. 
+First, users will need to download reference genome sequence in `FASTA` format `(.fa)`or `(.fna)` from NCBI together with its gene annotation file in GFF/GTF/GFF3 format. We will download these files with `wget` and unzip them with `gunzip`. 
 
 For this pipeline, I will use a japonica cv. Nipponbare AGIS 1.0 reference genome. 
 
@@ -199,11 +199,11 @@ gunzip 10_ref/Nipponbare.gff.gz
 
 **2. Index the reference FASTA** `bash`
 
-Now, once users have their reference `.fna` `.fasta` file, they need to index the genome first. It is a rule of thumb to create `index` files for the reference genome before they can begin with the alignment process. 
+Now, once users have their reference `.fna` or `.fa` file, they need to index the genome first. It is a rule of thumb to create `index` files for the reference genome before they can begin with the alignment process. 
 
 Think of an index as a table of contents in a book. Searching for a specific subtopic from the table of contents page is faster than searching page by page from the beginning. That is similar to what reference indexing tries to achieve. An aligner tool will jump directly to specific read positions based on the index file, rather than browsing the genome from the beginning. 
 
-Without an indexed reference, the aligner will work extremely slowly and often will fail. Even with index files, the aligner usually takes 2-8 hours to complete the entire ~370 Mb rice genome. 
+Without an indexed reference, the aligner will work extremely slowly and often will fail. Even with index files, the aligner usually takes 2-10 hours to complete the entire ~370 Mb rice genome. 
 
 To index the reference, either `BWA` Burrows-Wheeler Aligner, `BWA-MEM2` and `SAMtools` can be used for short-read WGS data. In this pipeline, I used `BWA v0.7.17`. 
 
