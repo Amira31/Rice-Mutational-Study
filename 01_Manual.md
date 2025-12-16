@@ -220,11 +220,11 @@ Indexing will create these five index outputs:
 
 ## Step 4: Aligning FASTQ reads to FASTA reference
 
-Since they are doing a mutational study, users need to align both wild-type and mutant read pairs (R1 and R2) separately to the reference genome. Direct alignment between non-reference wild-type and mutant is not a general standard of practice and can lead to false-positive variant calling. 
+For a mutational study, users need to align both wild-type and mutant read pairs (R1 and R2) separately to the reference genome. Direct alignment between non-reference wild-type and mutant is not a general standard of practice and can lead to false-positive variant calling. 
 
 **1. Decide how many threads to use** `bash`
 
-Before running the `bwa-mem` or `bwa-mem2 mem` commands, users can check the CPU specifications of their laptop or PC to estimate how many threads they can allocate to the alignment. 
+Before running the `bwa-mem` commands, users can check the CPU specifications of their laptop or PC to estimate how many threads they can allocate to the alignment. 
 
 This is because alignment process is usually painstakingly long due to it being computationally intensive. So, activating multi-threading allows the aligner to split  different batches of reads into parallel queues of multiple CPU threads to reduce the total runtime. Then, the aligner will merge back these parallel alignment records into a single SAM/BAM output stream.
 
@@ -233,44 +233,50 @@ This is because alignment process is usually painstakingly long due to it being 
 # to check available CPU cores
 nproc
 ```
-* `16 logical CPU cores` recommended to use 2-16 threads
-* `8 logical CPU cores` recommended to use 2-8 threads
+* `16 logical CPU cores` can use up to 16 threads
+* `8 logical CPU cores` can use up to 8 threads
 
 **2. Alignment of short reads to reference genome** `bash`
 
 ```bash
 # reads alignment to reference for wild-type
-bwa mem -t 4 10_ref/Nipponbare.fna \
-  01_trimmed_fastq/MR297_R1_paired.fq.gz \
-  01_trimmed_fastq/MR297_R2_paired.fq.gz | \
-samtools sort -@ 8 -o 20_bam/MR297.sorted.bam
-
-# reads alignment to reference for mutant
-bwa mem -t 4 10_ref/Nipponbare.fna \
-  01_trimmed_fastq/ML-1_R1_paired.fq.gz \
-  01_trimmed_fastq/ML-1_R2_paired.fq.gz | \
-samtools sort -@ 8 -o 20_bam/ML-1.sorted.bam
-```
-```bash
-# 1) Alignment only
 bwa mem -t 16 10_ref/Nipponbare.fna \
   01_trimmed_fastq/MR297_R1_paired.fq.gz \
   01_trimmed_fastq/MR297_R2_paired.fq.gz \
   > 20_bam/MR297.sam
 
-# 2) Sort + compress afterwards (controlled memory)
+# reads alignment to reference for mutant
+bwa mem -t 16 10_ref/Nipponbare.fna \
+  01_trimmed_fastq/ML-1_R1_paired.fq.gz \
+  01_trimmed_fastq/ML-1_R2_paired.fq.gz \
+  > 20_bam/ML-1.sam
+```
+
+```bash
+# create directory for BAM temporary files
 mkdir -p /root/tmp
 
+# creating and sorting wild-type BAM 
 samtools sort \
   -@ 2 \
   -m 512M \
   -T /root/tmp/MR297 \
-  -o 20_bam/MR297.sorted.bam \
+  -o 20_bam/MR297_sorted.bam \
   20_bam/MR297.sam
 
-# 3) Cleanup
+# creating and sorting mutant BAM
+samtools sort \
+  -@ 2 \
+  -m 512M \
+  -T /root/tmp/ML-1 \
+  -o 20_bam/ML-1_sorted.bam \
+  20_bam/ML-1.sam
+
+# remove wild-type and mutant SAM
 rm 20_bam/MR297.sam
+rm 20_bam/ML-1.sam
 ```
+
 
 
 
