@@ -17,9 +17,14 @@ Before embarking on the analysis, users need to set up the appropriate environme
 8. [Step 7: Annotating variants](#step-7-annotating-variants)
    
 ## Step 0: Prerequisite Checklist
-Before starting, users need to ensure that the starting input file is in the `FASTQ` or zipped `FASTQ` format for their wild-type and mutant sequences. 
 
-Users can also, optionally, use raw `FASTA` wild-type/mutant sequences. However, FASTA will not provide enough data for a comprehensive variant analysis. FASTQ, on the other hand, has a Phred quality score for each base (in line 4) thus allowing more depth to the analysis.
+Before analysis, users must ensure that input data are provided as `FASTQ` files (either uncompressed or gzip-compressed) for both wild-type and mutant samples. 
+
+`FASTQ` format is required because it has Phred quality scores for each base (in line 4) which is essential for reliable variant detection.
+
+While assembled FASTA sequences can be used for sequence comparison, they lack base-quality and read-depth information and are therefore unsuitable for comprehensive variant analysis.
+
+
 
 ```bash
 # Example of four-line string in FASTQ file
