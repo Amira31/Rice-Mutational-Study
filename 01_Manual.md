@@ -8,14 +8,13 @@ Before embarking on the analysis, users need to set up the appropriate environme
 
 ## Table of Contents
 1. [Prerequisite Checklist](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
-2. [Step 1: Setting up the directory](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
+2. [Step 1: Setting up directory](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
 3. [Step 2: Quality control and trimming](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
 4. [Step 3: Indexing of reference genome](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
-5. [Prerequisite Checklist](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
-6. [Setting up the directory](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
-7. [Indexing of reference genome](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
-8. [Prerequisite Checklist](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
-9. [Setting up the directory](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
+5. [Step 4: Aligning FASTQ reads to FASTA reference](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
+6. [Step 5: Duplicate marking and indexing of BAM](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
+7. [Step 6: Variant calling](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
+8. [Step 7: Annotating variants](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
    
 ## Step 0: Prerequisite Checklist
 Before starting, users need to ensure that the starting input file is in the `FASTQ` or zipped `FASTQ` format for their wild-type and mutant sequences. 
