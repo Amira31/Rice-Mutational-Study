@@ -71,13 +71,14 @@ rice_wgrs/
 * `02_bam` Subdirectory for storing BAM files after alignment
 * `03_vcf` Subdirectory for storing VCF files after variant calling
 
-Additional subdirectories may be created to organise multiple datasets (e.g., raw and trimmed reads), as long as their naming and placement are consistent with the directory structure shown above.
+Additional subdirectories may be created to organise multiple datasets (e.g., FastQC reports for raw and trimmed reads), as long as their naming and placement are consistent with the directory structure shown above.
 
 ```bash
 rice_wgrs/
 └── /00_fastq
-└── /01_raw_fastq
 └── /01_trimmed_fastq
+└── /02_fastqc
+└── /03_trimmed_fastqc
 
 └── /10_ref
 └── /20_bam
@@ -88,17 +89,17 @@ rice_wgrs/
 
 **1. Trimming reads** `bash`
 
-Before using FASTQ reads for alignment, users should process them to remove adapter sequences, low-quality bases, and reads that are too short. This trimming and quality filtering can be performed using tools such as `TRIMMOMATIC` or `fastp`. In this pipeline, I used `TRIMMOMATIC v0.39`. 
+Before using FASTQ reads for alignment, users should process them to remove adapter sequences, low-quality bases, and reads that are too short. The trimming and quality filtering can be performed using command-line tools such as `TRIMMOMATIC` or `fastp`. In this pipeline, I used  `TRIMMOMATIC v0.39`.
 
 ```bash
-# create directory for trimmmed FASTQ
+# create directory for trimmed FASTQ
 mkdir -p 01_trimmed_fastq
 
 # run trimming for wild-type:
 trimmomatic PE -threads 8 \
-  00_fastq/MR297_R1.fastq.gz 00_fastq/MR297_R2.fastq.gz \
-  01_trimmed_fastq/MR297_R1_paired.fq.gz 01_trimmed_fastq/MR297_R1_unpaired.fq.gz \
-  01_trimmed_fastq/MR297_R2_paired.fq.gz 01_trimmed_fastq/MR297_R2_unpaired.fq.gz \
+  00_fastq/WT_R1.fastq.gz 00_fastq/WT_R2.fastq.gz \
+  01_trimmed_fastq/WT_R1_paired.fq.gz 01_trimmed_fastq/WT_R1_unpaired.fq.gz \
+  01_trimmed_fastq/WT_R2_paired.fq.gz 01_trimmed_fastq/WT_R2_unpaired.fq.gz \
   ILLUMINACLIP:$CONDA_PREFIX/share/trimmomatic/adapters/TruSeq3-PE-2.fa:2:30:10 \
   LEADING:3 TRAILING:3 \
   SLIDINGWINDOW:4:15 \
@@ -106,9 +107,9 @@ trimmomatic PE -threads 8 \
 
 # run trimming for mutant:
 trimmomatic PE -threads 8 \
-  00_fastq/ML-1_R1.fastq.gz 00_fastq/ML-1_R2.fastq.gz \
-  01_trimmed_fastq/ML-1_R1_paired.fq.gz 01_trimmed_fastq/ML-1_R1_unpaired.fq.gz \
-  01_trimmed_fastq/ML-1_R2_paired.fq.gz 01_trimmed_fastq/ML-1_R2_unpaired.fq.gz \
+  00_fastq/M_R1.fastq.gz 00_fastq/M_R2.fastq.gz \
+  01_trimmed_fastq/M_R1_paired.fq.gz 01_trimmed_fastq/M_R1_unpaired.fq.gz \
+  01_trimmed_fastq/M_R2_paired.fq.gz 01_trimmed_fastq/M_R2_unpaired.fq.gz \
   ILLUMINACLIP:$CONDA_PREFIX/share/trimmomatic/adapters/TruSeq3-PE-2.fa:2:30:10 \
   LEADING:3 TRAILING:3 \
   SLIDINGWINDOW:4:15 \
@@ -118,11 +119,11 @@ trimmomatic PE -threads 8 \
 
 * `PE` Paired-end mode
 * `-threads 8` Using 8 CPU threads
-* `TruSeq3-PE-2.fa` Illumina adapter sequences to remove
+* `TruSeq3-PE-2.fa` Illumina adapter sequence type to remove
 *  `LEADING:3` Removes bases with quality < 3 from the start of the read (5')
 *  `TRAILING:3` Removes bases with quality < 3 from the end of the read (3')
 *  `SLIDINGWINDOW:4:15` Sliding window of a size of 4 bases. The window slides from 5' to 3' and removes reads that have an average quality belows 15. 
-*  `MINLEN:75` Removes reads that are < 75 bases
+*  `MINLEN:75` Removes reads that have < 75 bases
 
 **2. Quality check** `bash`
 
@@ -134,20 +135,35 @@ mkdir -p 02_fastqc
 
 # run FastQC analysis for wild-type
 fastqc -t 8 \
-  01_trimmed_fastq/MR297_R1_paired.fq.gz \
-  01_trimmed_fastq/MR297_R2_paired.fq.gz \
-  01_trimmed_fastq/MR297_R1_unpaired.fq.gz \
-  01_trimmed_fastq/MR297_R2_unpaired.fq.gz \
+  01_trimmed_fastq/WT_R1_paired.fq.gz \
+  01_trimmed_fastq/WT_R2_paired.fq.gz \
+  01_trimmed_fastq/WT_R1_unpaired.fq.gz \
+  01_trimmed_fastq/WT_R2_unpaired.fq.gz \
   -o 02_fastqc
 
 # run FastQC analysis for mutant
 fastqc -t 8 \
-  01_trimmed_fastq/ML-1_R1_paired.fq.gz \
-  01_trimmed_fastq/ML-1_R2_paired.fq.gz \
-  01_trimmed_fastq/ML-1_R1_unpaired.fq.gz \
-  01_trimmed_fastq/ML-1_R2_unpaired.fq.gz \
+  01_trimmed_fastq/M_R1_paired.fq.gz \
+  01_trimmed_fastq/M_R2_paired.fq.gz \
+  01_trimmed_fastq/M_R1_unpaired.fq.gz \
+  01_trimmed_fastq/M_R2_unpaired.fq.gz \
   -o 02_fastqc
 ```
+`fastqc` will assess the reads and provide a summary that consists of multiple modules:
+
+* `Basic Statistics`
+* `Per Base Sequence Quality`
+* `Per Tile Sequence Quality`
+* `Per Sequence Quality Scores`
+* `Per Base Sequence Content`
+* `Per Sequence GC Content`
+* `Per Base N Content`
+* `Sequence Length Distribution`
+* `Sequence Duplication Levels`
+* `Overrepresented Sequences`
+* `Adapter Content`
+
+Users are advised to run `FastQC` for both raw FASTQ and trimmed FASTQ, ensuring improved quality in each module for trimmed FASTQ, especially in terms of adapter content and per-base sequence quality. 
 
 ## Step 3: Indexing of reference genome 
 
