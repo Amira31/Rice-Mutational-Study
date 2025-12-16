@@ -33,7 +33,7 @@ While assembled FASTA sequences can be used for sequence comparison, they lack b
 (line 3) +
 (line 4) !''*((((***+))%%%++)(%%%%).1***-+*''))**5555555555
 ```
-Alternatively, users can also use test dataset available `here` in this Rice Mutational Study Github repository for testing. Once users have gone through the bottom and verified the pipeline's functionality, users may repeat with their real genomics dataset.  
+Alternatively, users can also use test dataset available `here` in this Rice Mutational Study Github repository for testing. Once users have verified the pipeline's functionality and reproducibility, users may repeat with their real genomics dataset.  
 
 ## Step 1: Setting up directory
 
@@ -41,21 +41,22 @@ Users will need to create a directory to store their input and output datasets i
 
 **1. To create a directory:** `bash`
 
-I would suggest users to create a parent directory and the sub-directories. Users may name the parent directory as the type of the analysis. For the sub-directories, users may name them according to the output format. 
+Users are suggested to create a parent directory and the subdirectories. Users may name the parent directory as the type of the analysis. For the sub-directories, users may name them according to the output format. 
 
 ```bash
-# Get into the mounted D drive:
+# Get into the mounted D drive for WSL Linux:
 cd /mnt
 cd d
 
-# Create parent & sub- directories simultaneously
+# Create parent & sub directories simultaneously
 mkdir -p rice_wgrs/00_fastq
 mkdir -p rice_wgrs/10_ref
 mkdir -p rice_wgrs/20_bam
 mkdir -p rice_wgrs/30_vcf
 ```
+`mkdir` syntax creates a directory. `-p` syntax directs the failed attempt to be silent and return a normal status if there is already an existing directory.
 
-This will give out folder structure as below:
+These commands will give out folder structure as below:
 ```bash
 rice_wgrs/
 └── /00_fastq
@@ -63,11 +64,25 @@ rice_wgrs/
 └── /20_bam
 └── /30_vcf 
 ```
+
 * `rice_wgrs` Parent directory 
-* `00_fastq` For storing filtered FASTQ files
-* `01_ref` For storing reference genome files and GFF
-* `02_bam` For storing BAM files after alignment
-* `03_vcf` For storing VCF files after variant calling
+* `00_fastq` Subdirectory for storing FASTQ files
+* `01_ref` Subdirectory for storing reference genome files and GFF
+* `02_bam` Subdirectory for storing BAM files after alignment
+* `03_vcf` Subdirectory for storing VCF files after variant calling
+
+Additional subdirectories may be created to organise multiple datasets (e.g., raw and trimmed reads), as long as their naming and placement are consistent with the directory structure shown above.
+
+```bash
+rice_wgrs/
+└── /00_fastq
+└── /01_raw_fastq
+└── /01_trimmed_fastq
+
+└── /10_ref
+└── /20_bam
+└── /30_vcf 
+```
 
 ## Step 2: Quality control and trimming
 
