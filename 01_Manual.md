@@ -7,7 +7,7 @@ Before embarking on the analysis, users need to set up the appropriate environme
 
 
 ## Table of Contents
-1. [Prerequisite Checklist](#prerequisite-checklist)
+1. [Prerequisite Checklist](#Step-0:-prerequisite-checklist)
 2. [Step 1: Setting up directory](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
 3. [Step 2: Quality control and trimming](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
 4. [Step 3: Indexing of reference genome](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
