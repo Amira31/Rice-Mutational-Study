@@ -8,13 +8,13 @@ Before embarking on the analysis, users need to set up the appropriate environme
 
 ## Table of Contents
 1. [Prerequisite Checklist](#step-0-prerequisite-checklist)
-2. [Step 1: Setting up directory](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
-3. [Step 2: Quality control and trimming](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
-4. [Step 3: Indexing of reference genome](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
-5. [Step 4: Aligning FASTQ reads to FASTA reference](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
-6. [Step 5: Duplicate marking and indexing of BAM](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
-7. [Step 6: Variant calling](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
-8. [Step 7: Annotating variants](https://github.com/Amira31/Rice-Mutational-Study/edit/main/01_Manual.md)
+2. [Step 1: Setting up directory](#step-1-setting-up-directory)
+3. [Step 2: Quality control and trimming](#step-2-quality-control-and-trimming)
+4. [Step 3: Indexing of reference genome](#step-3-indexing-of-reference-genome)
+5. [Step 4: Aligning FASTQ reads to FASTA reference](#step-4-aligning-fastq-reads-to-fasta-reference)
+6. [Step 5: Duplicate marking and indexing of BAM](#step-5-duplicate-marking-and-indexing-of-bam)
+7. [Step 6: Variant calling](#step-6-variant-calling)
+8. [Step 7: Annotating variants](#step-7-annotating-variants)
    
 ## Step 0: Prerequisite Checklist
 Before starting, users need to ensure that the starting input file is in the `FASTQ` or zipped `FASTQ` format for their wild-type and mutant sequences. 
@@ -182,7 +182,7 @@ Indexing will create these five index outputs:
 * `Nipponbare.fna.pac`
 * `Nipponbare.fna.sa`
 
-## Step 4: Read alignment
+## Step 4: Aligning FASTQ reads to FASTA reference
 
 Since they are doing a mutational study, users need to align both wild-type and mutant read pairs (R1 and R2) separately to the reference genome. Direct alignment between non-reference wild-type and mutant is not a general standard of practice and can lead to false-positive variant calling. 
 
@@ -243,7 +243,7 @@ rm 20_bam/MR297.sam
 * `samtools sort -@ 8` coordinate-sorting in 8 parallel threads
 * `-o` Sorted output will be written in BAM and stored in 20_bam folder
 
-## Step 5: BAM duplicate marking and indexing
+## Step 5: Duplicate marking and indexing of BAM
 
 ```bash
 # duplicate marking and indexing of wild-type BAM
