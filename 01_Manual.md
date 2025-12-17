@@ -12,10 +12,9 @@ Before embarking on the analysis, users need to set up the appropriate environme
 3. [Step 2: Quality control and trimming](#step-2-quality-control-and-trimming)
 4. [Step 3: Indexing of reference genome](#step-3-indexing-of-reference-genome)
 5. [Step 4: Aligning FASTQ reads to FASTA reference](#step-4-aligning-fastq-reads-to-fasta-reference)
-6. [Step 5: Converting SAM to BAM](#step-5-converting-sam-to-bam)
-7. [Step 6: Duplicate marking and indexing of BAM](#step-6-duplicate-marking-and-indexing-of-bam)
-8. [Step 7: Variant calling](#step-7-variant-calling)
-9. [Step 8: Annotating variants](#step-8-annotating-variants)
+6. [Step 5: Duplicate marking and indexing of BAM](#step-5-duplicate-marking-and-indexing-of-bam)
+7. [Step 7: Variant calling](#step-7-variant-calling)
+8. [Step 8: Annotating variants](#step-8-annotating-variants)
    
 ## Step 0: Prerequisite Checklist
 
@@ -258,42 +257,17 @@ bwa mem -t 16 10_ref/Nipponbare.fna \
 * `samtools sort -@ 8` coordinate-sorting in 8 parallel threads
 * `-o` Sorted output will be written in BAM and stored in 20_bam folder
 
-  
-## Step 5: Converting SAM to BAM
-
-This step is straightforward, yet time-taxing. 
-
-SAM is a huge sequence file (~40 GB). Thus, converting it into a coordinate-sorted BAM file (~5 GB) will be bound to the memory size. To put it, the sorting runtime length depends on the available RAM. 
- 
-Conceptually, `samtools` will create multiple intermediate files from SAM, sort them according to their genomic coordinates, and merge them into a single size-reduced BAM. 
-
-
 ```bash
-# create directory for BAM temporary files
-mkdir -p /root/tmp
-
-# creating and sorting wild-type BAM 
-samtools sort \
-  -@ 2 \
-  -m 512M \
-  -T /root/tmp/MR297 \
-  -o 20_bam/MR297_sorted.bam \
-  20_bam/MR297.sam
-
-# creating and sorting mutant BAM
-samtools sort \
-  -@ 2 \
-  -m 512M \
-  -T /root/tmp/ML-1 \
-  -o 20_bam/ML-1_sorted.bam \
-  20_bam/ML-1.sam
-
-# remove wild-type and mutant SAM
-rm 20_bam/MR297.sam
-rm 20_bam/ML-1.sam
+# convert SAM to unsorted BAM
+samtools view -@ 4 -bS 20_bam/MR297.sam -o 20_bam/MR297.bam
+samtools view -@ 4 -bS 20_bam/ML-1.sam -o 20_bam/ML-1.bam
 ```
+  
 
-## Step 6: Duplicate marking and indexing of BAM
+
+
+
+## Step 5: Duplicate marking and indexing of BAM
 
 ```bash
 # collate
@@ -661,7 +635,37 @@ gunzip -c 10_ref/Nipponbare1.fna.gz \
   | sort -u
 ```
 
+This step is straightforward, yet time-taxing. 
 
+SAM is a huge sequence file (~40 GB). Thus, converting it into a coordinate-sorted BAM file (~5 GB) will be bound to the memory size. To put it, the sorting runtime length depends on the available RAM. 
+ 
+Conceptually, `samtools` will create multiple intermediate files from SAM, sort them according to their genomic coordinates, and merge them into a single size-reduced BAM. 
+
+
+```bash
+# create directory for BAM temporary files
+mkdir -p /root/tmp
+
+# creating and sorting wild-type BAM 
+samtools sort \
+  -@ 2 \
+  -m 512M \
+  -T /root/tmp/MR297 \
+  -o 20_bam/MR297_sorted.bam \
+  20_bam/MR297.sam
+
+# creating and sorting mutant BAM
+samtools sort \
+  -@ 2 \
+  -m 512M \
+  -T /root/tmp/ML-1 \
+  -o 20_bam/ML-1_sorted.bam \
+  20_bam/ML-1.sam
+
+# remove wild-type and mutant SAM
+rm 20_bam/MR297.sam
+rm 20_bam/ML-1.sam
+```
 
 
 
