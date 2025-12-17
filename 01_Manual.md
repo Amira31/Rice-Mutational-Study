@@ -252,6 +252,21 @@ bwa mem -t 16 10_ref/Nipponbare.fna \
   > 20_bam/ML-1.sam
 ```
 
+* `bwa mem -t 4` aligner tool that processes reads in 4 parallel threads
+* `|` BWA sends alignment output directly to samtools sort without creating intermediate SAM file
+* `samtools sort -@ 8` coordinate-sorting in 8 parallel threads
+* `-o` Sorted output will be written in BAM and stored in 20_bam folder
+
+  
+## Step 5: Converting SAM to BAM
+
+This step is straightforward, yet time-taxing. 
+
+SAM is a huge sequence file (~40 GB). Thus, converting it into a coordinate-sorted BAM file (~5 GB) will be bound to the memory size. To put it, the sorting runtime length depends on the available RAM. 
+ 
+Conceptually, `samtools` will create multiple intermediate files from SAM, sort them according to their genomic coordinates, and merge them into a single size-reduced BAM. 
+
+
 ```bash
 # create directory for BAM temporary files
 mkdir -p /root/tmp
@@ -276,14 +291,6 @@ samtools sort \
 rm 20_bam/MR297.sam
 rm 20_bam/ML-1.sam
 ```
-
-
-
-
-* `bwa mem -t 4` aligner tool that processes reads in 4 parallel threads
-* `|` BWA sends alignment output directly to samtools sort without creating intermediate SAM file
-* `samtools sort -@ 8` coordinate-sorting in 8 parallel threads
-* `-o` Sorted output will be written in BAM and stored in 20_bam folder
 
 ## Step 5: Duplicate marking and indexing of BAM
 
