@@ -322,7 +322,8 @@ samtools view -H 20_bam/MR297_markdup.bam | grep '^@HD'
 ```
 ```bash
 # index BAM
-samtools index 20_bam/ML-1.bam
+samtools index 20_bam/MR297_markdup.bam
+samtools index 20_bam/ML-1_markdup.bam
 ```
 
 ## Step 6: Variant calling
@@ -344,15 +345,49 @@ Or, alternatively,
 
 ```bash
 # join VCF
+bcftools mpileup \
+  -a AD,ADF,ADR \
+  -q 30 -Q 20 \
+  -f 10_ref/Nipponbare.fna \
+  20_bam/MR297_markdup.bam \
+  20_bam/ML-1_markdup.bam | \
+bcftools call -vm -f GQ,GP -O u | \
+bcftools filter -i 'INFO/MQ>=40' \
+  -O z -o 30_vcf/MR297_ML-1.vcf.gz
+
+# 2
+bcftools mpileup \
+  -a AD,ADF,ADR,DP \
+  -q 30 -Q 20 \
+  -f 10_ref/Nipponbare.fna \
+  20_bam/MR297_markdup.bam \
+  20_bam/ML-1_markdup.bam | \
+bcftools call -vm -f GQ,GP -O u | \
+bcftools filter -i 'INFO/MQ>=40' -Oz -o 30_vcf/MR297_ML-1.vcf.gz
+
+bcftools view -v snps \
+  -i 'FORMAT/AD[0:1]=0 && (FORMAT/AD[1:1]/(FORMAT/AD[1:0]+FORMAT/AD[1:1])>=0.75) && FORMAT/DP[1]>=10 && FORMAT/DP[0]>=10' \
+  30_vcf/MR297_ML-1.vcf.gz \
+  -Oz -o 30_vcf/ML-1_unique_snps_0.75.vcf.gz
+
+tabix -p vcf 30_vcf/MR297_ML-1.vcf.gz
+tabix -p vcf 30_vcf/ML-1_unique_snps_0.75.vcf.gz
+```
+
+
+
+
+
+
+
+
 bcftools mpileup -a AD,ADF,ADR -B -q 30 -Q 20 -C 50 -f Nipponbare.fna \
-20_bam/MR297.bam 20_bam/ML-1.bam | \
+20_bam/MR297_markdup.bam 20_bam/ML-1_markdup.bam | \
 bcftools call -vm -f GQ,GP -O u | \
 bcftools filter -i 'INFO/MQ>=40 && INFO/DP>=10 && INFO/DP<=200' -O z -o 30_vcf/MR297_ML-1.vcf.gz
 ```
 
-```bash
-tabix -p vcf 30_vcf/MR297_ML1.vcf.gz
-```
+
 
 ```bash
 # extract unique SNPs
@@ -376,7 +411,12 @@ bcftools query -f '%CHROM\t%POS\t[%AF]\n' ML1_unique_snps_AF.vcf.gz | head
 bcftools view -i 'AF[ML-1]>0.75' ML1_unique_snps_AF.vcf.gz -Oz -o ML-1_unique_snps_0.75.vcf.gz
 ```
 
-
+```bash
+bcftools view -v snps \
+  -i 'FORMAT/AD[0:1]=0 && (FORMAT/AD[1:1]/(FORMAT/AD[1:0]+FORMAT/AD[1:1])>=0.75) && FORMAT/DP[1]>=10 && FORMAT/DP[0]>=10' \
+  30_vcf/MR297_ML1.vcf.gz \
+  -Oz -o 30_vcf/ML-1_unique_snps_0.75.vcf.gz
+```
 
 
 
