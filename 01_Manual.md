@@ -12,9 +12,9 @@ Before embarking on the analysis, users need to set up the appropriate environme
 3. [Step 2: Quality control and trimming](#step-2-quality-control-and-trimming)
 4. [Step 3: Indexing of reference genome](#step-3-indexing-of-reference-genome)
 5. [Step 4: Aligning FASTQ reads to FASTA reference](#step-4-aligning-fastq-reads-to-fasta-reference)
-6. [Step 5: Duplicate marking and indexing of BAM](#step-5-duplicate-marking-and-indexing-of-bam)
-7. [Step 6: Variant calling](#step-6-variant-calling)
-8. [Step 7: Annotating variants](#step-7-annotating-variants)
+6. [Step 6: Duplicate marking and indexing of BAM](#step-5-duplicate-marking-and-indexing-of-bam)
+7. [Step 7: Variant calling](#step-6-variant-calling)
+8. [Step 8: Annotating variants](#step-7-annotating-variants)
    
 ## Step 0: Prerequisite Checklist
 
@@ -292,24 +292,38 @@ rm 20_bam/MR297.sam
 rm 20_bam/ML-1.sam
 ```
 
-## Step 5: Duplicate marking and indexing of BAM
+## Step 6: Duplicate marking and indexing of BAM
 
 ```bash
-# duplicate marking and indexing of wild-type BAM
-samtools markdup -r \
-  20_bam/MR297.sorted.bam \
-  20_bam/MR297.bam
+# collate
+samtools collate -@ 4 -o 20_bam/MR297_collated.bam 20_bam/MR297_sorted.bam -T 20_bam/tmp/MR297_collate
 
-samtools index 20_bam/MR297.bam
+# fixmate
+samtools fixmate -m \
+  20_bam/MR297_collated.bam \
+  20_bam/MR297_fixmate.bam
 
-# duplicate marking and indexing of mutant BAM
-samtools markdup -r \
-  20_bam/ML-1.sorted.bam \
-  20_bam/ML-1.bam
+# sort
+samtools sort -@ 2 -m 512M -T /root/tmp/MR297_sort \
+  -o 20_bam/MR297_fixmate.sorted.bam \
+  20_bam/MR297_fixmate.bam
 
+# markdup
+samtools markdup \
+  20_bam/MR297_fixmate.sorted.bam \
+  20_bam/MR297_markdup.bam
+```
+
+```bash
+# verify the markdup BAM
+samtools view -H 20_bam/MR297_markdup.bam | head
+samtools view 20_bam/MR297_markdup.bam | head -n 5
+samtools view -H 20_bam/MR297_markdup.bam | grep '^@HD'
+```
+```bash
+# index BAM
 samtools index 20_bam/ML-1.bam
 ```
-* `samtools markdup`
 
 ## Step 6: Variant calling
 
