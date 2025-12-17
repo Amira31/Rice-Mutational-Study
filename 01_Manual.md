@@ -205,7 +205,9 @@ Think of an index as a table of contents in a book. Searching for a specific sub
 
 Without an indexed reference, the aligner will work extremely slowly and often will fail. Even with index files, the aligner usually takes 2-10 hours to complete the entire ~370 Mb rice genome. 
 
-To index the reference, either `BWA` Burrows-Wheeler Aligner, `BWA-MEM2` and `SAMtools` can be used for short-read WGS data. In this pipeline, I used `BWA v0.7.17`. 
+To index the reference before alignment, either `BWA` Burrows-Wheeler Aligner, `BWA-MEM2` and `SAMtools` can be used for short-read WGS data. In this pipeline, I used `BWA v0.7.17`. 
+
+In the future, users will need to view the aligned BAM on the Integrative Genomics Viewer (IGV) software. To be able to view the reference genome sequences, users are required beforehand to index the FASTA with `samtools faidx`. In this pipeline, I used `SAMtools v1.19.2`. 
 
 ```bash
 # Index the reference with BWA for alignment  
