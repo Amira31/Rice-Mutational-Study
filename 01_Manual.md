@@ -233,8 +233,8 @@ This is because alignment process is usually painstakingly long due to it being 
 # to check available CPU cores
 nproc
 ```
-* `16 logical CPU cores` can use up to 16 threads
-* `8 logical CPU cores` can use up to 8 threads
+* `16 logical CPU cores` Can use up to 16 threads.
+* `8 logical CPU cores` Can use up to 8 threads.
 
 **2. Alignment of short reads to reference genome** `bash`
 
@@ -252,16 +252,26 @@ bwa mem -t 16 10_ref/Nipponbare.fna \
   > 20_bam/ML-1.sam
 ```
 
-* `bwa mem -t 4` aligner tool that processes reads in 4 parallel threads
-* `|` BWA sends alignment output directly to samtools sort without creating intermediate SAM file
-* `samtools sort -@ 8` coordinate-sorting in 8 parallel threads
-* `-o` Sorted output will be written in BAM and stored in 20_bam folder
+* `mem` The algorithm used by BWA tool to align paired-end reads.
+* `-t 16` Uses 16 CPU threads.
+* `>` Directs the output to the specified SAM format.
+
+**3. Conversion of SAM to unsorted BAM** `bash`
+
+SAM is a huge sequence file (~40 GB). Using this file directly for the downstream process can be inefficient. Thus, converting SAM to unsorted BAM is highly recommended to reduce inefficiency. 
+
+Please take note that at this step, BAM has not been sorted yet from query-based to coordinate-based. This is because `samtools fixmate` requires a query-based BAM input for it to fill ms (mate score) tags, so that the SAM can be viable for the usage of `samtools markdup`. 
+
 
 ```bash
 # convert SAM to unsorted BAM
-samtools view -@ 4 -bS 20_bam/MR297.sam -o 20_bam/MR297.bam
-samtools view -@ 4 -bS 20_bam/ML-1.sam -o 20_bam/ML-1.bam
+samtools view -@ 4 -b 20_bam/MR297.sam -o 20_bam/MR297_unsorted.bam
+samtools view -@ 4 -b 20_bam/ML-1.sam -o 20_bam/ML-1_unsorted.bam
 ```
+* `samtools view` Subcommand for manipulating SAM/BAM data
+* `-@ 4` Uses 4 CPU threads
+*  `-b` Converts the output into BAM format
+* `-o` Specifies the output name
   
 
 
@@ -300,9 +310,15 @@ samtools view -H 20_bam/MR297_markdup.bam | grep '^@HD'
 samtools index 20_bam/MR297_markdup.bam
 samtools index 20_bam/ML-1_markdup.bam
 ```
+* `bwa mem -t 4` aligner tool that processes reads in 4 parallel threads
+* `|` BWA sends alignment output directly to samtools sort without creating intermediate SAM file
+* `samtools sort -@ 8` coordinate-sorting in 8 parallel threads
+* `-o` Sorted output will be written in BAM and stored in 20_bam folder
 
 ## Step 6: Variant calling
 
+* `|` BWA sends alignment output directly to samtools sort without creating intermediate SAM file
+* 
 ```bash
 # variant calling of wild-type
 bcftools mpileup -a AD,ADF,ADR -B -q 30 -Q 20 -C 50 -f Nipponbare.fna \
