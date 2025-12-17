@@ -12,9 +12,10 @@ Before embarking on the analysis, users need to set up the appropriate environme
 3. [Step 2: Quality control and trimming](#step-2-quality-control-and-trimming)
 4. [Step 3: Indexing of reference genome](#step-3-indexing-of-reference-genome)
 5. [Step 4: Aligning FASTQ reads to FASTA reference](#step-4-aligning-fastq-reads-to-fasta-reference)
-6. [Step 6: Duplicate marking and indexing of BAM](#step-5-duplicate-marking-and-indexing-of-bam)
-7. [Step 7: Variant calling](#step-6-variant-calling)
-8. [Step 8: Annotating variants](#step-7-annotating-variants)
+6. [Step 5: Converting SAM to BAM](#step-5-converting-sam-to-bam)
+7. [Step 6: Duplicate marking and indexing of BAM](#step-6-duplicate-marking-and-indexing-of-bam)
+8. [Step 7: Variant calling](#step-7-variant-calling)
+9. [Step 8: Annotating variants](#step-8-annotating-variants)
    
 ## Step 0: Prerequisite Checklist
 
