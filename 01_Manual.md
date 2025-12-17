@@ -208,8 +208,11 @@ Without an indexed reference, the aligner will work extremely slowly and often w
 To index the reference, either `BWA` Burrows-Wheeler Aligner, `BWA-MEM2` and `SAMtools` can be used for short-read WGS data. In this pipeline, I used `BWA v0.7.17`. 
 
 ```bash
-# Index the reference using BWA  
+# Index the reference with BWA for alignment  
 bwa index 10_ref/Nipponbare.fna
+
+#Index the reference with samtools for IGV viewing
+samtools faidx 10_ref/Nipponbare.fna
 ```
 Indexing will create these five index outputs:
 * `Nipponbare.fna.amb`
@@ -217,6 +220,8 @@ Indexing will create these five index outputs:
 * `Nipponbare.fna.bwt`
 * `Nipponbare.fna.pac`
 * `Nipponbare.fna.sa`
+  
+* `Nipponbare.fna.fai`
 
 ## Step 4: Aligning FASTQ reads to FASTA reference
 
