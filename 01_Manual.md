@@ -357,7 +357,7 @@ bcftools call -vm -f GQ,GP -O u | \
 bcftools filter -i 'INFO/MQ>=40' -Oz -o 30_vcf/MR297_ML-1.vcf.gz
 
 bcftools view -v snps \
-  -i 'FORMAT/AD[0:1]=0 && (FORMAT/AD[1:1]/(FORMAT/AD[1:0]+FORMAT/AD[1:1])>=0.75) && FORMAT/DP[1]>=10 && FORMAT/DP[0]>=10' \
+  -i 'FORMAT/AD[0:1]=0 && (FORMAT/AD[1:1]/(FORMAT/AD[1:0]+FORMAT/AD[1:1])>=0.75) && FORMAT/DP[0:0]>=10 && FORMAT/DP[1:0]>=10' \
   30_vcf/MR297_ML-1.vcf.gz \
   -Oz -o 30_vcf/ML-1_unique_snps_0.75.vcf.gz
 
