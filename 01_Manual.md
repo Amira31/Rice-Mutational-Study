@@ -267,7 +267,7 @@ bwa mem -t 16 10_ref/Nipponbare.fna \
 
 SAM is a huge sequence file (~40 GB). Using this file directly for the downstream process can be inefficient. Thus, converting SAM to unsorted BAM is highly recommended to reduce inefficiency. 
 
-Please take note that at this step, BAM has not been sorted yet from query-based to coordinate-based. This is because `samtools fixmate` requires a query-based BAM input for it to fill ms (mate score) tags, so that the SAM can be viable for the usage of `samtools markdup`. 
+Please take note that at this step, BAM has not been sorted yet from query-based to coordinate-based. This is because during the duplicate marking step, `samtools fixmate` requires a query-based BAM input for it to fill MS (mate score) tags. 
 
 
 ```bash
@@ -281,43 +281,86 @@ samtools view -@ 4 -b 20_bam/ML-1.sam -o 20_bam/ML-1_unsorted.bam
 * `-o` Specifies the output name
   
 
-
-
-
 ## Step 5: Duplicate marking and indexing of BAM
 
+**1. Converting coordinate-sorted BAM to query-sorted BAM (optional):** `bash`
+
+If you have performed `samtools sort` during the alignment process, it will produce an output of coordinate-sorted BAM (has SO:coordinate field). 
+
+And if you still want to do PCR marking, you can use `samtools collate` to convert coordinate-sorted BAM into query name-sorted BAM (has SO:queryname field). 
+
+This is because `samtools fixmate` cannot perform tag filling if it cannot find the QNAME (queryname) field on the BAM reads. 
+
 ```bash
-# collate
+# create a folder for temporary files
+mkdir -p 20_bam/tmp/MR297_collate
+
+# samtools collate on wild-type
 samtools collate -@ 4 -o 20_bam/MR297_collated.bam 20_bam/MR297_sorted.bam -T 20_bam/tmp/MR297_collate
 
-# fixmate
+# samtools collate on mutant
+samtools collate -@ 4 -o 20_bam/MR297_collated.bam 20_bam/MR297_sorted.bam -T 20_bam/tmp/MR297_collate
+```
+* `-@ 4` Uses 4 CPU threads
+* `-o` Directs the collated output into new BAM
+* ` -T 20_bam/tmp/MR297_collate` Direct the algorithm where to dump multiple temporary files 
+
+**2. PCR duplicate marking** `bash`
+```bash
+# create directory for temporary files in Linux root
+mkdir -p /root/tmp
+
+# samtools fixmate on wild-type and mutant
 samtools fixmate -m \
   20_bam/MR297_collated.bam \
   20_bam/MR297_fixmate.bam
 
-# sort
+samtools fixmate -m \
+  20_bam/ML-1_collated.bam \
+  20_bam/ML-1_fixmate.bam
+
+# samtools sort on wild-type and mutant
 samtools sort -@ 2 -m 512M -T /root/tmp/MR297_sort \
   -o 20_bam/MR297_fixmate.sorted.bam \
   20_bam/MR297_fixmate.bam
 
-# markdup
+samtools sort -@ 2 -m 512M -T /root/tmp/ML-1_sort \
+  -o 20_bam/ML-1_fixmate.sorted.bam \
+  20_bam/ML-1_fixmate.bam
+
+# samtools markdup on wild-type and mutant
 samtools markdup \
   20_bam/MR297_fixmate.sorted.bam \
   20_bam/MR297_markdup.bam
+
+samtools markdup \
+  20_bam/ML-1_fixmate.sorted.bam \
+  20_bam/ML-1_markdup.bam
+
+# remove unwanted intermediate BAM files
+rm *_collated.bam && rm *_fixmate.bam && rm *_fixmate.sorted.bam
 ```
 
+**3. Verifying BAM** `bash`
 ```bash
-# verify the markdup BAM
+# verify the wild-type markdup BAM
 samtools view -H 20_bam/MR297_markdup.bam | head
 samtools view 20_bam/MR297_markdup.bam | head -n 5
 samtools view -H 20_bam/MR297_markdup.bam | grep '^@HD'
+
+# verify the mutant markdup BAM
+samtools view -H 20_bam/ML-1_markdup.bam | head
+samtools view 20_bam/ML-1_markdup.bam | head -n 5
+samtools view -H 20_bam/ML-1_markdup.bam | grep '^@HD'
 ```
+
+**4. Indexing BAM** `bash`
 ```bash
 # index BAM
 samtools index 20_bam/MR297_markdup.bam
 samtools index 20_bam/ML-1_markdup.bam
 ```
-* `bwa mem -t 4` aligner tool that processes reads in 4 parallel threads
+
 * `|` BWA sends alignment output directly to samtools sort without creating intermediate SAM file
 * `samtools sort -@ 8` coordinate-sorting in 8 parallel threads
 * `-o` Sorted output will be written in BAM and stored in 20_bam folder
