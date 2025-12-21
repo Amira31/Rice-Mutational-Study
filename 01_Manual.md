@@ -233,7 +233,7 @@ For a mutational study, users need to align both wild-type and mutant read pairs
 
 Before running the `bwa-mem` commands, users can check the CPU specifications of their laptop or PC to estimate how many threads they can allocate to the alignment. 
 
-This is because alignment process is usually painstakingly long due to it being computationally intensive. So, activating multi-threading allows the aligner to split  different batches of reads into parallel queues of multiple CPU threads to reduce the total runtime. Then, the aligner will merge back these parallel alignment records into a single SAM/BAM output stream.
+This is because alignment process is usually painstakingly long due to it being computationally intensive. So, activating multi-threading allows the aligner to split  different batches of reads into multiple parallel CPU queues to reduce the total runtime. Then, the aligner will merge back these parallel alignment records into a single SAM/BAM output stream.
 
 
 ```bash
@@ -306,37 +306,58 @@ samtools collate -@ 4 -o 20_bam/MR297_collated.bam 20_bam/MR297_sorted.bam -T 20
 * ` -T 20_bam/tmp/MR297_collate` Direct the algorithm where to dump multiple temporary files 
 
 **2. PCR duplicate marking** `bash`
+
+In WGS sequencing, marking PCR duplicates is important to reduce false-positive reads. Oftentimes, sample preparation and PCR amplification before sequencing will lead to the same reads being replicated and sequenced. So, marking them with `samtools markdup` will tell variant caller tools to ignore these duplicated reads. 
+
+However, to run `samtools markdup`, it is prerequisite to add mate tags to the reads with `samtools fixmate` and sort the reads by their coordinate position with `samtools sort` as below. 
+
+
 ```bash
 # create directory for temporary files in Linux root
 mkdir -p /root/tmp
 
-# samtools fixmate on wild-type and mutant
+# samtools fixmate on wild-type
 samtools fixmate -m \
   20_bam/MR297_collated.bam \
   20_bam/MR297_fixmate.bam
 
+# samtools fixmate on mutant
 samtools fixmate -m \
   20_bam/ML-1_collated.bam \
   20_bam/ML-1_fixmate.bam
 
-# samtools sort on wild-type and mutant
+# samtools sort on wild-type
 samtools sort -@ 2 -m 512M -T /root/tmp/MR297_sort \
   -o 20_bam/MR297_fixmate.sorted.bam \
   20_bam/MR297_fixmate.bam
 
+# samtools sort on wild-type
 samtools sort -@ 2 -m 512M -T /root/tmp/ML-1_sort \
   -o 20_bam/ML-1_fixmate.sorted.bam \
   20_bam/ML-1_fixmate.bam
 
-# samtools markdup on wild-type and mutant
+# samtools markdup on wild-type
 samtools markdup \
   20_bam/MR297_fixmate.sorted.bam \
   20_bam/MR297_markdup.bam
 
+# samtools markdup on mutant
 samtools markdup \
   20_bam/ML-1_fixmate.sorted.bam \
   20_bam/ML-1_markdup.bam
+```
+* `-m` Add and correct mate score tags and fields (MC, MQ, TLEN)
+* `\` Tells the shell the command continues on next line, thus, do not execute yet
+* `@ 2` Uses 2 CPU threads
+* `-m 512M` 
 
+* 
+These collective commands will result to multiple large intermediate BAM files (> 5GB each). So, it is advisable to remove the intermediate BAM files as below:
+* `collated.bam`
+* `fixmate.bam`
+* `fixmate.sorted.bam`
+
+```bash
 # remove unwanted intermediate BAM files
 rm *_collated.bam && rm *_fixmate.bam && rm *_fixmate.sorted.bam
 ```
