@@ -470,6 +470,10 @@ awk -F'\t' 'BEGIN{OFS="\t"}{
     }
 }' > $SNPEFF_HOME/data/ML-1_snpeff_ann_Excel.tsv
 
+iconv -f ASCII -t UTF-8 \
+  $SNPEFF_HOME/data/ML-1_snpeff_ann_Excel.tsv \
+  -o $SNPEFF_HOME/data/ML-1_snpeff_ann_Excel_utf8.tsv
+
 ```
 
 <br/>
