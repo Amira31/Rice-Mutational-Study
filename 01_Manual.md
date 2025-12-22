@@ -351,6 +351,7 @@ samtools markdup \
 * `@ 2` Uses 2 CPU threads
 * `-m 512M` Working memory size per thread for sorting
 * `-T` Directs samtools to dump temporary files under the specified file prefix
+* `-o` Directs samtools where to write the stdout
 
 These collective commands will result to multiple large intermediate BAM files (> 5GB each). So, it is advisable to remove the intermediate BAM files as below:
 * `collated.bam`
