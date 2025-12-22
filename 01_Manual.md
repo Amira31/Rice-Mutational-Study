@@ -347,17 +347,20 @@ samtools markdup \
   20_bam/ML-1_markdup.bam
 ```
 * `-m` Add and correct mate score tags and fields (MC, MQ, TLEN)
-* `\` Tells the shell the command continues on next line, thus, do not execute yet
+* `\` Tells the shell the command continues on the next line, thus, do not execute yet
 * `@ 2` Uses 2 CPU threads
-* `-m 512M` 
+* `-m 512M` Working memory size per thread for sorting
+* `-T` Directs samtools to dump temporary files under the specified file prefix
 
-* 
 These collective commands will result to multiple large intermediate BAM files (> 5GB each). So, it is advisable to remove the intermediate BAM files as below:
 * `collated.bam`
 * `fixmate.bam`
 * `fixmate.sorted.bam`
 
 ```bash
+# confirm file names
+ls *_collated.bam *_fixmate.bam *_fixmate.sorted.bam
+
 # remove unwanted intermediate BAM files
 rm *_collated.bam && rm *_fixmate.bam && rm *_fixmate.sorted.bam
 ```
