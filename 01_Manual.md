@@ -421,11 +421,56 @@ tabix -p vcf 30_vcf/MR297_ML-1.vcf.gz
 tabix -p vcf 30_vcf/ML-1_unique_snps_0.75.vcf.gz
 ```
 
+## Step 7. Variant annotation `bash`
 
+```bash
+SNPEFF_HOME=/home/mira/miniconda3/envs/snpeff/share/snpeff-5.2-1
+```
+```bash
+ls $SNPEFF_HOME/data/
+ls $SNPEFF_HOME/data/genomes
 
+# check FASTA header
+grep "^>" $SNPEFF_HOME/data/genomes/Nipponbare.fa | head
 
+# check GFF header
+cut -f1 $SNPEFF_HOME/data/Nipponbare/genes.gff | sort | uniq
 
+# check VCF header
+bcftools view -H $SNPEFF_HOME/data/ML-1_unique_snps_0.75.vcf.gz | cut -f1 | sort -u
 
+# convert from NC_089035.1 to Chr1 in VCF
+nano $SNPEFF_HOME/data/vcf_rename.txt
+bcftools annotate --rename-chrs $SNPEFF_HOME/data/vcf_rename.tx
+t \
+  -O z \
+  -o $SNPEFF_HOME/data/ML-1_unique_snps_0.75_renamed.vcf.gz \
+  $SNPEFF_HOME/data/ML-1_unique_snps_0.75.vcf.gz
+
+# verify new VCF header
+view -H $SNPEFF_HOME/data/ML-1_unique_snps_0.75_renamed.vcf.gz | cut -f1 | sort -u
+
+# index new VCF
+tabix -p vcf $SNPEFF_HOME/data/ML-1_unique_snps_0.75_renamed.vcf.gz
+ls $SNPEFF_HOME/data/ML-1_unique_snps_0.75_renamed.vcf.gz.tbi
+
+# 
+java -Xmx6g -jar $SNPEFF_HOME/snpEff.jar \
+  -v Nipponbare \
+  $SNPEFF_HOME/data/ML-1_unique_snps_0.75_renamed.vcf.gz \
+  > $SNPEFF_HOME/data/ML-1_unique_snps_0.75_renamed.ann.vcf
+
+bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\t%INFO/ANN\n' \
+  $SNPEFF_HOME/data/ML-1_unique_snps_0.75_renamed.ann.vcf | \
+awk -F'\t' 'BEGIN{OFS="\t"}{
+    n=split($5,a,",");
+    for(i=1;i<=n;i++){
+        split(a[i],b,"|");
+        print $1,$2,$3,$4,b[2],b[3],b[4],b[5],b[6],b[7],b[8],b[9]
+    }
+}' > $SNPEFF_HOME/data/ML-1_snpeff_ann_Excel.tsv
+
+```
 
 <br/>
 <br/>
