@@ -395,7 +395,7 @@ samtools index 20_bam/ML-1_markdup.bam
 **1. Creating joint VCF** `bash`
 
 ```bash
-# variant calling of wild-type
+# variant calling of wild-type and mutant
 bcftools mpileup \
   -a AD,ADF,ADR,DP \
   -q 30 -Q 20 \
