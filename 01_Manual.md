@@ -406,10 +406,10 @@ bcftools call -vm -f GQ,GP -O u | \
 bcftools filter -i 'INFO/MQ>=40' -Oz -o 30_vcf/MR297_ML-1.vcf.gz
 ```
 
-**2. Filter VCF for unique SNPs with SNP index > 0.75** `bash`
+**2. Filter VCF for unique SNPs with SNP index ≥ 0.75** `bash`
 
 ```bash
-# 
+# filter for unique SNPs with SNP index ≥ 0.75
 bcftools view -v snps \
   -i 'FORMAT/AD[0:1]=0 && (FORMAT/AD[1:1]/(FORMAT/AD[1:0]+FORMAT/AD[1:1])>=0.75) && FORMAT/DP[0:0]>=10 && FORMAT/DP[1:0]>=10' \
   30_vcf/MR297_ML-1.vcf.gz \
