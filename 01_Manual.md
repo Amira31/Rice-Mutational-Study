@@ -13,8 +13,8 @@ Before embarking on the analysis, users need to set up the appropriate environme
 4. [Step 3: Indexing of reference genome](#step-3-indexing-of-reference-genome)
 5. [Step 4: Aligning FASTQ reads to FASTA reference](#step-4-aligning-fastq-reads-to-fasta-reference)
 6. [Step 5: Duplicate marking and indexing of BAM](#step-5-duplicate-marking-and-indexing-of-bam)
-7. [Step 7: Variant calling](#step-7-variant-calling)
-8. [Step 8: Annotating variants](#step-8-annotating-variants)
+7. [Step 6: Variant calling](#step-6-variant-calling)
+8. [Step 7: Variant annotation](#step-7-variant-annotation)
    
 ## Step 0: Prerequisite Checklist
 
@@ -422,7 +422,61 @@ tabix -p vcf 30_vcf/ML-1_unique_snps_0.75.vcf.gz
 ```
 
 ## Step 7. Variant annotation `bash`
+```bash
+# create a directory for annotation output
+mkdir -p 31_snpeff
 
+# define path to the database
+SNPEFF_HOME=/home/mira/miniconda3/envs/snpeff/share/snpeff-5.2-1
+
+# verify the path
+ls $SNPEFF_HOME/data/
+ls $SNPEFF_HOME/data/genomes
+
+# check FASTA header
+grep "^>" $SNPEFF_HOME/data/genomes/Nipponbare.fa | head
+
+# check GFF header
+cut -f1 $SNPEFF_HOME/data/Nipponbare/genes.gff | sort | uniq
+
+# check VCF header
+bcftools view -H $SNPEFF_HOME/data/ML-1_unique_snps_0.75.vcf.gz | cut -f1 | sort -u
+
+# convert from NC_089035.1 to Chr1 in VCF
+nano $SNPEFF_HOME/data/vcf_rename.txt
+bcftools annotate --rename-chrs $SNPEFF_HOME/data/vcf_rename.tx
+t \
+  -O z \
+  -o $SNPEFF_HOME/data/ML-1_unique_snps_0.75_renamed.vcf.gz \
+  $SNPEFF_HOME/data/ML-1_unique_snps_0.75.vcf.gz
+
+# verify new VCF header
+view -H $SNPEFF_HOME/data/ML-1_unique_snps_0.75_renamed.vcf.gz | cut -f1 | sort -u
+
+# index new VCF
+tabix -p vcf $SNPEFF_HOME/data/ML-1_unique_snps_0.75_renamed.vcf.gz
+ls $SNPEFF_HOME/data/ML-1_unique_snps_0.75_renamed.vcf.gz.tbi
+
+# run snpeff
+java -Xmx6g -jar $SNPEFF_HOME/snpEff.jar \
+  -v Nipponbare \
+  -stats 33_snpeff/ML-1_snpeff_summary.html \
+  $SNPEFF_HOME/data/ML-1_unique_snps_0.75_renamed.vcf.gz \
+  > 33_snpeff/ML-1_unique_snps_0.75_renamed.ann.vcf.gz
+
+# convert annotated VCF to tab-delimited TXT
+bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\t%INFO/ANN\n' \
+  33_snpeff/ML-1_unique_snps_0.75_renamed.ann.vcf.gz | \
+awk -F'\t' 'BEGIN{OFS="\t"}{
+    split($5,a,",");
+    split(a[1],b,"|");
+    print $1,$2,$3,$4, \
+          b[2],b[3],b[4],b[5],b[6],b[7],b[8],b[9]
+
+}' > 33_snpeff/ML-1_snpeff_ann_table.txt
+```
+
+Old commands:
 ```bash
 SNPEFF_HOME=/home/mira/miniconda3/envs/snpeff/share/snpeff-5.2-1
 ```
