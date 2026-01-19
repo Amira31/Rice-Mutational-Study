@@ -73,6 +73,7 @@ rice_wgrs/
 
 Additional subdirectories may be created to organise multiple datasets (e.g., FastQC reports for raw and trimmed reads), as long as their naming and placement are consistent with the directory structure shown above.
 
+Example:
 ```bash
 rice_wgrs/
 └── /00_fastq
@@ -89,7 +90,7 @@ rice_wgrs/
 
 **1. Trimming reads** `bash`
 
-Before using FASTQ reads for alignment, users should process them to remove adapter sequences, low-quality bases, and reads that are too short. The trimming and quality filtering can be performed using command-line tools such as `TRIMMOMATIC` or `fastp`. In this pipeline, I used  `TRIMMOMATIC v0.39`.
+As a general rule, users should process FASTQ reads prior to alignment analysis by removing adapter sequences, low-quality bases, and short reads to ensure data viability. The trimming and quality filtering can be performed using command-line tools such as `TRIMMOMATIC` or `fastp`. In this pipeline, I used  `TRIMMOMATIC v0.39`.
 
 ```bash
 # create directory for trimmed FASTQ
