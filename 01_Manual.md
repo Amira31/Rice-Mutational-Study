@@ -200,7 +200,7 @@ gunzip 10_ref/Nipponbare.gff.gz
 
 **2. Index the reference FASTA** `bash`
 
-Now, once users have their reference `.fna` or `.fa` file, they need to index the genome first. It is a rule of thumb to create `index` files for the reference genome before they can begin with the alignment process. 
+Once users have their reference `.fna` or `.fa` file, they need to index the genome first. It is a rule of thumb to create `index` files for the reference genome before they can begin with the alignment process. 
 
 Think of an index as a table of contents in a book. Searching for a specific subtopic from the table of contents page is faster than searching page by page from the beginning. That is similar to what reference indexing tries to achieve. An aligner tool will jump directly to specific read positions based on the index file, rather than browsing the genome from the beginning. 
 
