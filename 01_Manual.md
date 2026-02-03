@@ -760,6 +760,24 @@ rm 20_bam/ML-1.sam
 ```
 
 
+## To calculate SNs substitution counts
+```bash
+bcftools query -l 30_vcf/MR297_ML-1.vcf.gz
+
+bcftools view -s '20_bam/MR297_markdup.bam' -v snps -m2 -M2 30_vcf/MR297_ML-1.vcf.gz \
+| bcftools view -i 'GT="0/1" || GT="1/1"' \
+| bcftools query -f '%REF\t%ALT\n' \
+| awk '{print $1 ">" $2}' \
+| sort | uniq -c | sort -k2
+
+bcftools view -s '20_bam/ML-1_markdup.bam' -v snps -m2 -M2 30
+_vcf/MR297_ML-1.vcf.gz \
+| bcftools view -i 'GT="0/1" || GT="1/1"' \
+| bcftools query -f '%REF\t%ALT\n' \
+| awk '{print $1 ">" $2}' \
+| sort | uniq -c | sort -k2
+```
+
 
 
 
