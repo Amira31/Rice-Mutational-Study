@@ -422,7 +422,7 @@ tabix -p vcf 30_vcf/MR297_ML-1.vcf.gz
 tabix -p vcf 30_vcf/ML-1_unique_snps_0.75.vcf.gz
 ```
 
-## Step 7. Variant annotation `bash`
+## Step 7. Variant annotation
 ```bash
 # create a directory for annotation output
 mkdir -p 31_snpeff
