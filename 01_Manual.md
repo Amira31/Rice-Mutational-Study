@@ -417,21 +417,20 @@ bcftools view -v snps \
   -Oz -o 30_vcf/ML-1_unique_snps_0.75.vcf.gz
 ```
 **Filtering parameter:**
-*`-v snps` to only extract SNP type variants 
+* `-v snps` to only extract SNP type variants 
 
 Assuming, 
-*`(FORMAT/AD)` = allele depth 
-*`[0:1] / [1:1] / [1:0] / [0:0]` = [sample:allele]
-*`[0]` = MR297
-*`[1]` = ML-1
-*`[0]` = REF
-*`[1]` = ALT
+* `(FORMAT/AD)` = allele depth 
+* `[0:1] / [1:1] / [1:0] / [0:0]` = [sample:allele]
+* `[0]` = MR297
+* `[1]` = ML-1
+* `[0]` = REF
+* `[1]` = ALT
 
 Thus, 
-*`FORMAT/AD[0:1]=0` to remove MR297 ALT SNPs 
-*`(FORMAT/AD[1:1]/(FORMAT/AD[1:0]+FORMAT/AD[1:1]>=0.75)` SNP index = ALT reads / (REF reads + ALT reads) ≥ 0.75
-
-`FORMAT/DP[1:0]>=10` to ensure MR297 has at least 10 reads at every position, otherwise absent also means no coverage
+* `FORMAT/AD[0:1]=0` to remove MR297 ALT SNPs 
+* `(FORMAT/AD[1:1]/(FORMAT/AD[1:0]+FORMAT/AD[1:1]>=0.75)` SNP index = ALT reads / (REF reads + ALT reads) ≥ 0.75
+* `FORMAT/DP[1:0]>=10` to ensure MR297 has at least 10 reads at every position, otherwise absent also means no coverage
 
 
  **3. Indexing VCF for downstream uses** `bash`
